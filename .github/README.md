@@ -1,3 +1,3 @@
-# GitHub automation outline
+# GitHub automation
 
-Add CI workflows when executable modules and meaningful quality checks exist. No workflow or passing CI badge is included in this scaffold.
+`workflows/ci.yml` runs locked dependency installation, lint, formatting, type checks, tests, and the offline demo on pushes and pull requests. No hosted model or secrets are required. Check the actual run before claiming CI success.

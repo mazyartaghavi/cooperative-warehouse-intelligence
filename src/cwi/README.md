@@ -1,3 +1,3 @@
-# Runtime module outlines
+# Runtime modules
 
-These folders reserve module boundaries. No importable Python package or runtime is present. See the root README for responsibilities and docs/ROADMAP.md for sequencing.
+M1 provides an installable Python package. Conversation, retrieval, policy, state, agents, and API have working text-to-task components. Speech, planning, simulation, RL, and evaluation directories remain outlines. See the root README for capability status.
