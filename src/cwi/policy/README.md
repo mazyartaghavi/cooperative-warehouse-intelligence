@@ -1,17 +1,5 @@
-# Authorization and rules
+# Policy
 
-**Status: PLANNED — module outline only.**
+Implemented: server-configured role checks, payload and restricted-destination guards, explicit safety-bypass detection, and observed-ID validation. These fixture checks do not certify robot safety.
 
-## Purpose
-
-Structured constraints and authorized time-limited operational overrides.
-
-## Intended contract
-
-Candidate task, issuer, and rule version → allow, deny, or clarify.
-
-## Completion evidence
-
-Hard safety constraints cannot be overridden; permission conflicts and expiry tested.
-
-Implementation, configuration, and tests will accompany the corresponding roadmap milestone.
+See [development instructions](../../../docs/development.md) for setup and limitations.

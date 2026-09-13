@@ -1,17 +1,5 @@
-# Service interfaces
+# Api
 
-**Status: PLANNED — module outline only.**
+Implemented: token-protected session and message routes plus health status. One configured identity, in-memory state, single worker, and no robot dispatch. Production authentication and streaming remain planned.
 
-## Purpose
-
-Typed operator requests, robot events, and streamed task status.
-
-## Intended contract
-
-Authorized requests/events → validated responses.
-
-## Completion evidence
-
-Authentication, input validation, task identity, and reconnect behavior verified.
-
-Implementation, configuration, and tests will accompany the corresponding roadmap milestone.
+See [development instructions](../../../docs/development.md) for setup and limitations.

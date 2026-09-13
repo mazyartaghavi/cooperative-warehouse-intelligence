@@ -1,3 +1,3 @@
-# Validation outline
+# Validation
 
-Add meaningful unit, integration, and end-to-end tests alongside implemented behavior. Priorities: incorrect task arguments, unauthorized overrides, stale state, duplicate dispatch, infeasible schedules, and clarification recovery. No application tests exist yet.
+Run `uv run pytest -q`. Scenario tests cover ambiguity, corrections, confirmation, authorization, payload checks, hallucinated identifiers, cancellation, API input validation, retrieval filters, and mocked Ollama contracts. Test doubles do not establish live-model quality. See `docs/verification.md`.

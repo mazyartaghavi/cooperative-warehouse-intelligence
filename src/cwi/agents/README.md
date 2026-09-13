@@ -1,17 +1,5 @@
-# Agentic orchestration
+# Agents
 
-**Status: PLANNED — module outline only.**
+Implemented: in-memory retrieve/extract/validate/clarify/confirm workflow, corrections, cancellation, and confirmation revalidation. Persistent LangGraph workflows and execution recovery remain planned.
 
-## Purpose
-
-Persistent bounded tool workflows, task lifecycle, monitoring, and recovery.
-
-## Intended contract
-
-Validated task and evidence → tool calls and evidence-backed status.
-
-## Completion evidence
-
-Retries do not duplicate dispatch; pause/resume and failure recovery preserve task identity.
-
-Implementation, configuration, and tests will accompany the corresponding roadmap milestone.
+See [development instructions](../../../docs/development.md) for setup and limitations.

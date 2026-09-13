@@ -1,17 +1,5 @@
-# Conversation and task understanding
+# Conversation
 
-**Status: PLANNED — module outline only.**
+Implemented: strict task contracts, a controlled English offline baseline, and an optional local Ollama schema adapter. Live-model quality and free-form dialogue are not verified. Responses currently use templates.
 
-## Purpose
-
-Intent and entity extraction, conversational context, corrections, and targeted clarification.
-
-## Intended contract
-
-Operator text and context → candidate structured task or clarification request.
-
-## Completion evidence
-
-Ambiguous references, corrections, missing fields, and no invented identifiers.
-
-Implementation, configuration, and tests will accompany the corresponding roadmap milestone.
+See [development instructions](../../../docs/development.md) for setup and limitations.

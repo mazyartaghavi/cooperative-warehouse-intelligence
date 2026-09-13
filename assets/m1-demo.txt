@@ -1,0 +1,13 @@
+Cooperative Warehouse Intelligence — OFFLINE RULES BASELINE (no LLM)
+
+Operator: Move the blue tote to P2
+Coordinator [clarification]: Which tote do you mean? Observed: T17, T23.
+Evidence: TRANSPORT@1.0, ACCESS@1.0, PAYLOAD@1.0
+
+Operator: T17
+Coordinator [awaiting_confirmation]: Confirm T17 from A to P2, normal priority? Reply 'confirm' or correct it.
+Evidence: TRANSPORT@1.0, ACCESS@1.0, PAYLOAD@1.0
+
+Operator: confirm
+Coordinator [accepted]: Task specification accepted. Planning and robot dispatch are not implemented in M1; no robot has moved.
+Evidence: TRANSPORT@1.0

@@ -3,33 +3,32 @@
 ## Current snapshot
 
 - Completed: approved subject, title, GenAI-first design, recruiter-facing project overview, directory/module outlines, and initial repository publication.
-- Current milestone: M0 repository scaffold. Next implementation milestone: M1.
-- Implemented application capabilities: none.
-- Experimental capabilities: none executed.
-- Planned capabilities: all runtime modules described below.
+- Current milestone: M1 text-to-task implementation, prepared for PR review.
+- Next: validate an installed local model, then implement M2 robot execution simulation.
+- Implemented: text API, synthetic observed state, lexical retrieval, clarification/correction, deterministic policy checks, confirmation, and a runnable offline baseline.
+- Experimental: Ollama structured extraction adapter is contract-tested; live-model evaluation is pending.
+- Planned: speech, persistent LangGraph orchestration, hybrid retrieval, dynamic robotics, optimization, and RL.
 
 ## Milestones
 
 | Milestone | Scope | Completion evidence | Status |
 | --- | --- | --- | --- |
 | M0 | Documentation and repository scaffold | Reviewed files and verified GitHub publication | Published |
-| M1 | Text conversation, procedure retrieval, validated task extraction and clarification | Reproducible text scenario, citations, failure cases, and meaningful tests | Planned |
+| M1 | Text conversation, procedure retrieval, validated task extraction and clarification | Runnable baseline, source citations, 35 passing tests; live LLM validation pending | Implemented baseline; LLM adapter experimental |
 | M2 | Three-robot dynamic warehouse and planning | End-to-end task execution, changing obstacles, observable status, and reservation checks | Planned |
 | M3 | Recorded and live voice | Transcription, spoken replies, corrections, and measured identifier/noise errors | Planned |
 | M4 | Agent reliability | Recovery, cancellation, conflicting orders, duplicate protection, persistence, and reconnect scenarios | Planned |
 | M5 | RL clarification study | Fixed-rule baselines, held-out evaluation, multiple seeds, and transparent reports | Planned |
 | M6 | Hardware preparation | Documented adapter contract and physical validation plan | Planned |
 
-## Next implementation milestone
+## Next milestone and known issues
 
-M1: a narrow text request → retrieve evidence → clarify → produce a validated task flow. Robot dispatch remains unavailable until the execution backend exists. Select and pin dependencies only when required for this milestone.
-
-## Known issues and open decisions
-
-- LLM, speech models, vector backend, and compute budget have not been benchmarked or selected.
-- Runtime packaging, CI, tests, and deployment artifacts are absent intentionally.
-- Software license is not selected.
-- Hardware equipment and physical validation access are unspecified.
+- Review the M1 PR and validate an installed Ollama model against the annotated task scenarios.
+- Then M2: connect accepted specifications to a three-robot simulation and constrained planning.
+- Speech, vector retrieval, LangGraph persistence, model-quality benchmarks, and production deployment remain absent.
+- Local test dependencies emit two upstream deprecation warnings (Starlette/httpx and AnyIO); tests pass. These warnings are not suppressed.
+- One demo token maps to one server-configured operator; sessions are in memory and requests serialized. This is not multi-user production authentication.
+- Software license, hardware access, and model compute budget remain open decisions.
 
 ## Planned experiments
 

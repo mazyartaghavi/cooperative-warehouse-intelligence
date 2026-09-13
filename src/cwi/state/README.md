@@ -1,17 +1,5 @@
-# Observed warehouse state
+# State
 
-**Status: PLANNED — module outline only.**
+Implemented: immutable synthetic tote/warehouse fixtures and an operator contract. Live observations, event persistence, freshness, and dynamic simulation remain planned.
 
-## Purpose
-
-Tasks, observations, freshness, reservations, and execution events.
-
-## Intended contract
-
-Timestamped robot events → versioned observed state.
-
-## Completion evidence
-
-Stale observations remain explicit; no privileged simulator-state leakage.
-
-Implementation, configuration, and tests will accompany the corresponding roadmap milestone.
+See [development instructions](../../../docs/development.md) for setup and limitations.
