@@ -3,7 +3,7 @@
 ## Current snapshot
 
 - Completed: approved subject, title, GenAI-first design, recruiter-facing project overview, directory/module outlines, and initial repository publication.
-- Current milestone: M1 text-to-task implementation, prepared for PR review.
+- Current milestone: M1 text-to-task foundation merged into main (PR #1); live-model validation remains pending.
 - Next: validate an installed local model, then implement M2 robot execution simulation.
 - Implemented: text API, synthetic observed state, lexical retrieval, clarification/correction, deterministic policy checks, confirmation, and a runnable offline baseline.
 - Experimental: Ollama structured extraction adapter is contract-tested; live-model evaluation is pending.
@@ -23,7 +23,7 @@
 
 ## Next milestone and known issues
 
-- Review the M1 PR and validate an installed Ollama model against the annotated task scenarios.
+- Validate an installed Ollama model against annotated task scenarios before expanding the conversational backend.
 - Then M2: connect accepted specifications to a three-robot simulation and constrained planning.
 - Speech, vector retrieval, LangGraph persistence, model-quality benchmarks, and production deployment remain absent.
 - Local test dependencies emit two upstream deprecation warnings (Starlette/httpx and AnyIO); tests pass. These warnings are not suppressed.
