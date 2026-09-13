@@ -1,0 +1,38 @@
+# Python and tools
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Credentials and local settings
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local operational data and generated artifacts
+*.sqlite
+*.sqlite3
+*.db
+data/private/
+data/raw/
+outputs/
+checkpoints/
+*.pt
+*.pth
+*.safetensors
+*.log
+
+# Editors and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
