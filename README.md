@@ -4,9 +4,15 @@
 
 **Generative AI · Agentic AI · LLMs · RAG · Speech/NLP · Constrained Optimization · Reinforcement Learning · Robotics**
 
-Cooperative Warehouse Intelligence explores how human operators can direct cooperating mobile robots through text and speech. Its central challenge is turning natural-language requests into grounded, unambiguous, authorized tasks—and maintaining that agreement when the warehouse changes.
+## The project in one minute
 
-The design connects conversational AI and procedure retrieval with planning, execution feedback, and human clarification. A partially observable warehouse provides an operational setting in which language decisions have measurable consequences: correct deliveries, conflicting priorities, delays, and recovery from blocked routes.
+**Three mobile robots cooperate to transport goods in a warehouse while coordinating with human operators.** The target system accepts **written orders, recorded voice messages, and live spoken conversations through a robot microphone and speaker**. Operators can clarify a destination, correct an order, or request an authorized change in priority.
+
+**Generative AI, LLMs, NLP, RAG, and agentic workflows form the conversational coordination layer.** They interpret instructions, retrieve applicable warehouse procedures, inspect observed state, and ask targeted follow-up questions when an order is ambiguous. The agent then submits a validated task to the execution layer and explains status using actual execution evidence.
+
+The target warehouse is **dynamic, partially observable, and uncertain**: people and other robots move, aisles become blocked, new tasks arrive, batteries deplete, and observations become stale. Robots share observations and coordinate missions. **Constrained optimization** will support task allocation, routing, scheduling, and charging; **reinforcement learning** will study adaptive clarification and information-gathering decisions that support coordination under uncertainty.
+
+**Implementation target:** the complete three-robot scenario above. **Working foundation today:** the text-to-task prototype described below. Speech, physical/simulated robot execution, optimization, and RL remain planned extensions; the current prototype does not move robots.
 
 **Available now (M1):** runnable text-to-task API and offline demo, versioned lexical procedure retrieval, clarification and correction, deterministic policy checks, and explicit task confirmation. A local Ollama extraction adapter is implemented and contract-tested; live-model performance is not yet verified. [Run the demo](docs/development.md) · [Verification](docs/verification.md) · [Roadmap](docs/ROADMAP.md).
 
