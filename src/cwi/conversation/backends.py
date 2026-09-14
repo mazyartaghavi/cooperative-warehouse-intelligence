@@ -46,7 +46,7 @@ class BaselineBackend:
                 intent.color = None
             if destinations:
                 intent.destination = destinations[0]
-            colors = re.findall(r"\b(blue|red)\b", lower)
+            colors = re.findall(r"\b(blue|red|green)\b", lower)
             if colors and not totes:
                 intent.color = colors[-1]
                 intent.tote_id = None

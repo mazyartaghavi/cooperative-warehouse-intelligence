@@ -2,12 +2,16 @@
 
 import threading
 from dataclasses import dataclass, field
+from typing import Any
 from uuid import uuid4
 
-from cwi.conversation.backends import Backend, BackendError, BaselineBackend
+from cwi.agents.workflow import Workflow
+from cwi.conversation.backends import Backend
 from cwi.conversation.models import Reply, Task
 from cwi.policy.validation import validate
 from cwi.retrieval.service import Retriever
+from cwi.simulation.world import World
+from cwi.state.store import Store
 from cwi.state.warehouse import Operator, Warehouse
 
 
@@ -25,13 +29,24 @@ class ConversationService:
         operator: Operator | None = None,
         warehouse: Warehouse | None = None,
         retriever: Retriever | None = None,
+        world: World | None = None,
+        store: Store | None = None,
     ) -> None:
         self.backend = backend
         self.operator = operator or Operator()
         self.warehouse = warehouse or Warehouse()
         self.retriever = retriever or Retriever()
         self.sessions: dict[str, Session] = {}
-        self.lock = threading.Lock()
+        self.lock = threading.RLock()
+        self.world = world
+        self.store = store
+        if world is not None:
+            self.warehouse = world.warehouse
+        self.workflow = Workflow(self.backend, self.retriever, self.operator)
+        if store is not None:
+            saved = store.load()
+            if saved:
+                self.restore(saved)
 
     def new_session(self) -> str:
         with self.lock:
@@ -39,9 +54,57 @@ class ConversationService:
                 raise ValueError("Demo session limit reached; restart the service.")
             identifier = str(uuid4())
             self.sessions[identifier] = Session()
+            self.persist()
             return identifier
 
+    def checkpoint(self) -> dict[str, Any]:
+        return {
+            "sessions": {
+                sid: {
+                    "turns": s.turns,
+                    "pending": s.pending.model_dump() if s.pending else None,
+                    "final": s.final.model_dump() if s.final else None,
+                }
+                for sid, s in self.sessions.items()
+            },
+            "world": self.world.checkpoint() if self.world else None,
+        }
+
+    def restore(self, data: dict[str, Any]) -> None:
+        self.sessions = {
+            sid: Session(
+                s["turns"],
+                Task.model_validate(s["pending"]) if s["pending"] else None,
+                Reply.model_validate(s["final"]) if s["final"] else None,
+            )
+            for sid, s in data["sessions"].items()
+        }
+        if data["world"] is not None:
+            self.world = World.restore(data["world"])
+            self.warehouse = self.world.warehouse
+
+    def persist(self) -> None:
+        if self.store is not None:
+            self.store.save(self.checkpoint())
+
     def reply(self, identifier: str, text: str) -> Reply:
+        with self.lock:
+            if self.world:
+                self.warehouse = self.world.warehouse
+            previous = self.checkpoint()
+            try:
+                result = self._reply(identifier, text)
+            except Exception:
+                self.persist()  # Retain invalidation of old confirmation on extraction failure.
+                raise
+            try:
+                self.persist()
+            except Exception:
+                self.restore(previous)
+                raise
+            return result
+
+    def _reply(self, identifier: str, text: str) -> Reply:
         if not text.strip() or len(text) > 2000:
             raise ValueError("Messages must contain 1–2000 nonblank characters.")
         with self.lock:
@@ -101,12 +164,19 @@ class ConversationService:
                         message="Observed task details changed. Please restate your request.",
                         trace=["confirmation_guard", "revalidate"],
                     )
+                if self.world is not None:
+                    self.world.submit(identifier, pending)
                 session.final = Reply(
                     session_id=identifier,
                     status="accepted",
                     backend=self.backend.name,
-                    message="Task specification accepted. Planning and robot dispatch are not "
-                    "implemented in M1; no robot has moved.",
+                    message=(
+                        "Task queued for simulated robot execution. "
+                        "Watch the warehouse for progress."
+                        if self.world is not None
+                        else "Task specification accepted; execution is disabled."
+                    ),
+                    execution_dispatched=self.world is not None,
                     task=pending,
                     citations=[self.retriever.required("TRANSPORT")],
                     trace=["confirmation_guard", "revalidate", "accept_specification"],
@@ -117,18 +187,8 @@ class ConversationService:
             if len(session.turns) >= 40:
                 raise ValueError("Demo turn limit reached; start a new session.")
             turns = session.turns + [text]
-            evidence = self.retriever.search(" ".join(turns))
-            trace = ["retrieve_procedures", "extract_intent", "validate_policy"]
-            intent = self.backend.extract(turns, evidence)
-            # Independently reject explicit protective-bypass phrases recognized by the baseline.
-            try:
-                if BaselineBackend().extract([text], []).disable_safety:
-                    intent.disable_safety = True
-            except BackendError:
-                pass
-            decision = validate(intent, turns, self.warehouse, self.operator)
-            cited = {c.document_id: c for c in evidence}
-            cited[decision.document] = self.retriever.required(decision.document)
+            result = self.workflow.run(turns, self.warehouse)
+            decision = result["decision"]
             session.turns = turns
             session.pending = decision.task
             return Reply.model_validate(
@@ -138,7 +198,7 @@ class ConversationService:
                     "message": decision.message,
                     "backend": self.backend.name,
                     "task": decision.task,
-                    "citations": list(cited.values()),
-                    "trace": trace,
+                    "citations": result["evidence"],
+                    "trace": result["trace"],
                 }
             )

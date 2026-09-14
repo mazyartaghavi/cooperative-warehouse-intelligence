@@ -3,16 +3,30 @@
 import logging
 import os
 import secrets
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI, Header, HTTPException
+from pydantic import Field
 
 from cwi.agents.service import ConversationService
 from cwi.conversation.backends import BackendError, BaselineBackend, OllamaBackend
-from cwi.conversation.models import Message, Reply
+from cwi.conversation.models import Message, Reply, StrictModel
+from cwi.retrieval.service import Retriever
+from cwi.simulation.world import World
+from cwi.state.store import Store
 from cwi.state.warehouse import Operator
 
 logger = logging.getLogger(__name__)
+
+
+class Advance(StrictModel):
+    ticks: int = Field(default=1, ge=1, le=500)
+
+
+class Obstacle(StrictModel):
+    x: int
+    y: int
+    present: bool = True
 
 
 def create_app(service: ConversationService, token: str) -> FastAPI:
@@ -26,7 +40,11 @@ def create_app(service: ConversationService, token: str) -> FastAPI:
 
     @app.get("/health")
     def health() -> dict[str, str | bool]:
-        return {"status": "ok", "backend": service.backend.name, "robot_dispatch": False}
+        return {
+            "status": "ok",
+            "backend": service.backend.name,
+            "robot_dispatch": service.world is not None,
+        }
 
     @app.post("/sessions", dependencies=[Depends(authenticate)], status_code=201)
     def new_session() -> dict[str, str]:
@@ -48,6 +66,44 @@ def create_app(service: ConversationService, token: str) -> FastAPI:
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 
+    @app.get("/warehouse", dependencies=[Depends(authenticate)])
+    def warehouse() -> dict[str, Any]:
+        with service.lock:
+            if service.world is None:
+                raise HTTPException(409, "Simulation is disabled")
+            return service.world.snapshot()
+
+    @app.post("/warehouse/advance", dependencies=[Depends(authenticate)])
+    def advance(body: Advance) -> dict[str, Any]:
+        with service.lock:
+            if service.world is None:
+                raise HTTPException(409, "Simulation is disabled")
+            previous = service.checkpoint()
+            try:
+                service.world.step(body.ticks)
+                service.warehouse = service.world.warehouse
+                service.persist()
+                return service.world.snapshot()
+            except Exception:
+                service.restore(previous)
+                raise
+
+    @app.post("/warehouse/obstacles", dependencies=[Depends(authenticate)])
+    def obstacle(body: Obstacle) -> dict[str, bool]:
+        with service.lock:
+            if service.world is None:
+                raise HTTPException(409, "Simulation is disabled")
+            previous = service.checkpoint()
+            try:
+                service.world.obstacle((body.x, body.y), body.present)
+                service.persist()
+            except ValueError as exc:
+                raise HTTPException(422, str(exc)) from exc
+            except Exception:
+                service.restore(previous)
+                raise
+            return {"updated": True}
+
     return app
 
 
@@ -57,14 +113,25 @@ def app_factory() -> FastAPI:
     if role not in {"operator", "supervisor"}:
         raise ValueError("CWI_OPERATOR_ROLE must be operator or supervisor.")
     operator = Operator(role="supervisor" if role == "supervisor" else "operator")
-    if backend_name == "baseline":
-        return create_app(
-            ConversationService(BaselineBackend(), operator), os.environ.get("CWI_API_TOKEN", "")
-        )
-    if backend_name != "ollama":
+    if backend_name not in {"baseline", "ollama"}:
         raise ValueError("CWI_BACKEND must be baseline or ollama.")
-    model = OllamaBackend(
-        os.environ.get("CWI_OLLAMA_MODEL", ""),
-        os.environ.get("CWI_OLLAMA_URL", "http://localhost:11434"),
+    from cwi.conversation.backends import Backend
+
+    backend: Backend = (
+        BaselineBackend()
+        if backend_name == "baseline"
+        else OllamaBackend(
+            os.environ.get("CWI_OLLAMA_MODEL", ""),
+            os.environ.get("CWI_OLLAMA_URL", "http://localhost:11434"),
+        )
     )
-    return create_app(ConversationService(model, operator), os.environ.get("CWI_API_TOKEN", ""))
+    token = os.environ.get("CWI_API_TOKEN", "")
+    if len(token) < 16:
+        raise ValueError("CWI_API_TOKEN must be at least 16 characters.")
+    store = Store(os.environ.get("CWI_DB", "data/local/cwi.db"))
+    return create_app(
+        ConversationService(
+            backend, operator, retriever=Retriever(store.procedures()), world=World(), store=store
+        ),
+        token,
+    )

@@ -24,6 +24,7 @@ class Warehouse:
         Tote("T17", "blue", "A", 12.0),
         Tote("T23", "blue", "A", 8.0),
         Tote("T31", "red", "B", 80.0),
+        Tote("T42", "green", "B", 15.0),
     )
     destinations: tuple[str, ...] = ("P1", "P2", "Q1")
     restricted_destinations: tuple[str, ...] = ("Q1",)
