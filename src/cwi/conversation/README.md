@@ -1,5 +1,5 @@
-# Conversation
+# Language contracts
 
-Implemented: strict task contracts, a controlled English offline baseline, and an optional local Ollama schema adapter. Live-model quality and free-form dialogue are not verified. Responses currently use templates.
+`models.py` defines strict intent, task and reply schemas. `backends.py` supplies a controlled grammar baseline and local Ollama extraction adapter. `knowledge.py` retrieves/generates cited informational answers, which cannot dispatch work.
 
-See [development instructions](../../../docs/development.md) for setup and limitations.
+See the [project README](../../../README.md) for startup, evidence and scope.

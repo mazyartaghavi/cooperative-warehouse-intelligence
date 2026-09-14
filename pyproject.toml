@@ -4,14 +4,17 @@ build-backend = "hatchling.build"
 
 [project]
 name = "cooperative-warehouse-intelligence"
-version = "0.1.0"
-description = "Grounded text-to-task conversations for warehouse coordination"
+version = "0.2.0"
+description = "Grounded human-robot conversations and cooperative warehouse simulation"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
   "fastapi==0.141.1",
   "httpx==0.28.1",
+  "langgraph==1.2.11",
+  "ortools==9.15.6755",
   "pydantic==2.13.5",
+  "python-multipart==0.0.32",
   "uvicorn==0.52.4",
 ]
 
@@ -20,6 +23,13 @@ dev = ["pytest==9.1.1", "ruff==0.16.7", "mypy==2.3.1"]
 
 [project.scripts]
 cwi-demo = "cwi.demo:main"
+cwi-evaluate = "cwi.evaluation.run:main"
+cwi-evaluate-llm = "cwi.evaluation.language:main"
+
+[project.optional-dependencies]
+voice = [
+    "faster-whisper==1.2.1",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/cwi"]

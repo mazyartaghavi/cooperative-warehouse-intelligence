@@ -1,3 +1,3 @@
-# Configuration outline
+# Configuration
 
-Reserve model, retrieval, planner, simulation, and evaluation configuration here after schemas are defined. Do not store credentials. No active configuration is provided.
+Runtime configuration is deliberately centralized in the root `.env.example` and environment variables. No separate configuration framework is required. See [development](../docs/development.md) for every variable, local models, persistence and the experimental assistance policy.

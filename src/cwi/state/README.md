@@ -1,5 +1,5 @@
-# State
+# Durable state
 
-Implemented: immutable synthetic tote/warehouse fixtures and an operator contract. Live observations, event persistence, freshness, and dynamic simulation remain planned.
+`warehouse.py` defines synthetic inventory and the configured operator. `store.py` seeds versioned procedure records and atomically writes a SQLite checkpoint containing conversations and simulator state. This is a single-process store, not distributed persistence.
 
-See [development instructions](../../../docs/development.md) for setup and limitations.
+See the [project README](../../../README.md) for startup, evidence and scope.

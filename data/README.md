@@ -1,3 +1,5 @@
 # Data and provenance
 
-M1 embeds five original synthetic procedures in `src/cwi/retrieval/service.py` and three synthetic totes in `src/cwi/state/warehouse.py`. They were authored for this project and contain no real warehouse data. No external corpus or private recordings are used. Separate train/evaluation datasets will accompany later experiments.
+The project authors provide six synthetic procedures and four synthetic totes, including one overweight tote, in the Python fixtures. Runtime startup seeds procedure records into SQLite. There are no real warehouse records, operator recordings, third-party datasets or model weights in the repository.
+
+Runtime databases and their WAL files are ignored by Git. Treat persisted transcripts as operational data. Training and evaluation seeds are separate; the tiny synthetic fixtures are not a held-out language or human-interaction benchmark.

@@ -1,17 +1,5 @@
-# Speech interaction
+# Local voice input
 
-**Status: PLANNED — module outline only.**
+`service.py` provides a local faster-whisper adapter behind a small protocol. Audio is bounded, decoded with an existing CPU model, and deleted afterward. The API returns transcription for review; audio alone never dispatches a task. Optional model quality requires live evaluation.
 
-## Purpose
-
-Recorded audio, live microphone turns, transcription, and spoken responses.
-
-## Intended contract
-
-Audio → transcript; response text → speech.
-
-## Completion evidence
-
-Task-critical identifier errors, timestamps, expiry, interruption, and noise measured.
-
-Implementation, configuration, and tests will accompany the corresponding roadmap milestone.
+See the [project README](../../../README.md) for startup, evidence and scope.

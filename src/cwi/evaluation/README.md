@@ -1,17 +1,5 @@
-# Evaluation and baselines
+# Reproducible experiments
 
-**Status: PLANNED — module outline only.**
+`run.py` executes three-robot scenarios, retrieval fixtures, seeded clarification experiments and integrated blocked-route assistance comparisons. `language.py` evaluates a specified live Ollama model and records actual errors and latency. Generated outputs default to ignored `outputs/` paths.
 
-## Purpose
-
-Scenario replay, metrics, ablations, and reproducibility records.
-
-## Intended contract
-
-Versioned scenarios and traces → measured reports.
-
-## Completion evidence
-
-No fabricated results; separate simulated operators from human evaluations.
-
-Implementation, configuration, and tests will accompany the corresponding roadmap milestone.
+See the [project README](../../../README.md) for startup, evidence and scope.

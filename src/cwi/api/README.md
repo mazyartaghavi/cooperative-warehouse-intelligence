@@ -1,5 +1,5 @@
-# Api
+# Operator interface
 
-Implemented: token-protected session and message routes plus health status. One configured identity, in-memory state, single worker, and no robot dispatch. Production authentication and streaming remain planned.
+`app.py` exposes authenticated conversation, warehouse, knowledge, transcription and workload routes. `dashboard.html` provides a responsive canvas map, text conversation, recording controls, transcript review and optional browser speech synthesis. Run one worker.
 
-See [development instructions](../../../docs/development.md) for setup and limitations.
+See the [project README](../../../README.md) for startup, evidence and scope.

@@ -1,5 +1,5 @@
-# Agents
+# Agent coordination
 
-Implemented: in-memory retrieve/extract/validate/clarify/confirm workflow, corrections, cancellation, and confirmation revalidation. Persistent LangGraph workflows and execution recovery remain planned.
+`workflow.py` compiles the LangGraph retrieve/extract/validate graph. `service.py` owns clarification, corrections, confirmation revalidation, idempotent dispatch and SQLite checkpoints. Generated fields cannot execute outside this boundary.
 
-See [development instructions](../../../docs/development.md) for setup and limitations.
+See the [project README](../../../README.md) for startup, evidence and scope.

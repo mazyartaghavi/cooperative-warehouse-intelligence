@@ -1,0 +1,10 @@
+.git
+.venv
+.env
+.env.*
+data
+outputs
+checkpoints
+__pycache__
+*.db*
+*.sqlite*
