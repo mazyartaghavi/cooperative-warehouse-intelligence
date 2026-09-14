@@ -1,7 +1,7 @@
 # Warehouse execution milestone
 
 The API factory enables a deterministic 12 × 8 warehouse with three robots and local
-Manhattan-radius-one obstacle sensing. The planner never receives hidden obstacles.
+Manhattan-radius-one obstacle sensing. The planner never receives hidden obstacles. Active inspection can extend local sensing to radius three at a one-unit energy cost.
 Observations are shared between robots; a changing obstacle is added or removed from
 the shared map only when observed. Initial tote inventory and station coordinates
 are trusted fixtures, not inferred camera detections.
@@ -15,7 +15,7 @@ known obstacles. Each time step reserves occupied starting cells and accepted ta
 cells, preventing both vertex collisions and edge swaps. Robot precedence rotates.
 This conservative heuristic is not globally optimal multi-agent pathfinding and can
 wait indefinitely in a blocked layout; the event log makes that limitation visible.
-New detours can invalidate an earlier energy estimate; zero-energy robots stop.
+New detours can invalidate an earlier energy estimate; zero-energy robots stop and request assistance.
 
 SQLite atomically checkpoints sessions, jobs, robots, observations, and simulator
 state. The configured service is single-process; multiple workers are unsupported.

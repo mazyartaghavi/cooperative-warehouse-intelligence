@@ -1,3 +1,8 @@
-# Demonstration evidence
+# Recorded artifacts
 
-`m1-demo.txt` is an actual captured offline rules-baseline run. It is not an LLM or robotics demonstration. Future screenshots and recordings must identify their runtime and implementation status.
+- `evaluation.json`: executed synthetic warehouse, retrieval, Q-learning and integrated assistance experiments.
+- `clarification-policy.json`: actual Q values trained with seed 7; mirrored in the installed package.
+- `m1-demo.txt`: historical transcript of the earlier specification-only milestone.
+- `demo.txt`: current instruction-to-simulated-delivery transcript.
+
+No measured physical robot performance or live model/speech scores are claimed. Browser screenshots are produced as CI artifacts when that check succeeds.

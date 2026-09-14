@@ -1,245 +1,265 @@
 # Cooperative Warehouse Intelligence
 
-**Conversational and agentic AI for coordinated action in dynamic warehouses.**
+**A GenAI system for coordinating three warehouse robots through grounded human conversations.**
 
-**Generative AI · Agentic AI · LLMs · RAG · Speech/NLP · Constrained Optimization · Reinforcement Learning · Robotics**
+[![Python quality](https://github.com/mazyartaghavi/cooperative-warehouse-intelligence/actions/workflows/ci.yml/badge.svg)](https://github.com/mazyartaghavi/cooperative-warehouse-intelligence/actions/workflows/ci.yml)
 
-## The project in one minute
+Three mobile robots transport totes between storage and packing stations in a changing
+warehouse. An operator can type an instruction, upload a voice message, or speak into
+a microphone. The system retrieves warehouse procedures, interprets the request,
+asks about ambiguous details, checks permissions, and presents the exact task for
+confirmation. An optimizer assigns confirmed work to robots; the simulator coordinates
+movement, discovers obstacles locally, replans routes, and accounts for battery use.
 
-**Three mobile robots cooperate to transport goods in a warehouse while coordinating with human operators.** The target system accepts **written orders, recorded voice messages, and live spoken conversations through a robot microphone and speaker**. Operators can clarify a destination, correct an order, or request an authorized change in priority.
+**The central engineering problem is the boundary between what a person means and
+what a robot is permitted and able to do.** LLM output proposes a task; validated
+state, explicit confirmation, and deterministic execution checks control dispatch.
 
-**Generative AI, LLMs, NLP, RAG, and agentic workflows form the conversational coordination layer.** They interpret instructions, retrieve applicable warehouse procedures, inspect observed state, and ask targeted follow-up questions when an order is ambiguous. The agent then submits a validated task to the execution layer and explains status using actual execution evidence.
+This repository provides a runnable **simulation research prototype**. It includes a
+local LLM adapter and optional local speech transcription. The offline demonstration
+uses a clearly identified rules baseline. Physical robot deployment and live model
+quality are separate validation requirements; neither is represented as completed.
 
-The target warehouse is **dynamic, partially observable, and uncertain**: people and other robots move, aisles become blocked, new tasks arrive, batteries deplete, and observations become stale. Robots share observations and coordinate missions. **Constrained optimization** will support task allocation, routing, scheduling, and charging; **reinforcement learning** will study adaptive clarification and information-gathering decisions that support coordination under uncertainty.
+## See the interaction
 
-**Implementation target:** the complete three-robot scenario above. **Working foundation today:** the text-to-task prototype described below. Speech, physical/simulated robot execution, optimization, and RL remain planned extensions; the current prototype does not move robots.
+```text
+Operator: Move the blue tote to P2.
+Robot team: Which tote do you mean? Observed: T17, T23.
+Operator: T17.
+Robot team: Confirm T17 from A to P2, normal priority?
+Operator: Confirm.
+Robot team: Task queued for simulated robot execution.
 
-**Available now (M1):** runnable text-to-task API and offline demo, versioned lexical procedure retrieval, clarification and correction, deterministic policy checks, and explicit task confirmation. A local Ollama extraction adapter is implemented and contract-tested; live-model performance is not yet verified. [Run the demo](docs/development.md) · [Verification](docs/verification.md) · [Roadmap](docs/ROADMAP.md).
-
-## Problem
-
-Warehouse instructions often omit crucial details: which tote, which destination, whose instruction takes priority, or whether an exception is permitted. Meanwhile, aisle availability, robot batteries, station queues, and order priorities can change.
-
-This project asks how a conversational agent can retrieve the right procedure, inspect current state, ask a useful question, and coordinate feasible action without inventing information or treating every request as executable.
-
-## Capability status
-
-| Capability | Status | Evidence or boundary |
-| --- | --- | --- |
-| Text-to-task conversation | Implemented | Clarification, corrections, confirmation, cancellation; local demo and API |
-| Grounded retrieval | Implemented baseline | Five original synthetic procedures; lexical retrieval and versioned citations |
-| LLM intent extraction | Experimental adapter | Local Ollama JSON-schema contract tested with mocked HTTP; live model evaluation pending |
-| Agentic workflow | Implemented baseline | Bounded retrieve/extract/validate/confirm orchestration; in-memory state |
-| Authorization and validation | Implemented demo guards | Server-configured role, destination, payload, known IDs, confirmation revalidation |
-| Speech and fluent dialogue | Planned | Recorded/live speech, spoken replies, interruption handling, generated responses |
-| Multi-robot warehouse | Planned | Three tote carriers, dynamic obstacles, partial observations, execution feedback |
-| Constrained optimization | Planned | Assignment, scheduling, charging, and conflict-free route reservations |
-| Reinforcement learning | Planned research | Clarification decisions versus fixed-rule baselines |
-
-## Demonstration available now
-
-Actual offline run, using the explicitly labeled rules baseline:
-
-> **Operator:** Move the blue tote to P2
->
-> **Coordinator:** Which tote do you mean? Observed: T17, T23.
->
-> **Operator:** T17
->
-> **Coordinator:** Confirm T17 from A to P2, normal priority? Reply 'confirm' or correct it.
->
-> **Operator:** confirm
->
-> **Coordinator:** Task specification accepted. Planning and robot dispatch are not implemented in M1; no robot has moved.
-
-Every response includes the backend name, task state, evidence citations, workflow trace, and a dispatch flag. See [the captured transcript](assets/m1-demo.txt).
-
-## Target voice and warehouse experience
-
-The following is an **illustrative target interaction**, not a recorded demonstration:
-
-> **Operator:** Take the blue tote to packing first.
->
-> **Coordinator:** There are two blue totes at receiving. Do you mean T17 or T23, and which packing station?
->
-> **Operator:** T17 to P2. Make it urgent.
->
-> **Coordinator:** That would delay order 42. Should I apply your priority override?
->
-> **Operator:** Yes.
->
-> **Coordinator:** The task is accepted. I will check a route around the blocked aisle before dispatching a robot.
-
-The target interfaces include text, timestamped recorded voice messages, and live microphone conversations with spoken replies. Physical face-to-face interaction requires later microphone/speaker integration and hardware validation. References such as “that one” require a known object selection or additional clarification; visual gesture understanding is outside the initial scope.
-
-## Architecture
-
-**Target architecture:** M1 implements text input, bounded conversation state, lexical retrieval, observed fixture lookup, authorization checks, and confirmation. Constrained planning and robot execution remain planned.
-
-```mermaid
-flowchart TD
-    A["Operator: text or speech"] --> B["Persistent conversational agent"]
-    B <--> C["Procedure retrieval"]
-    B <--> D["Observed warehouse state"]
-    B --> E{"Clear and authorized?"}
-    E -->|No| F["Clarification or refusal"]
-    F --> A
-    E -->|Yes| G["Constrained planning"]
-    G --> H["Validated robot missions"]
-    H --> I["Execution and observations"]
-    I --> D
-    I --> B
+The optimizer assigns a robot. A newly sensed obstacle updates the shared map.
+The robot reroutes, picks up T17, delivers it to P2, and returns to its charger.
 ```
 
-### Primary AI components
+Two more conversations—`Move T23 to P1` and `Move T42 to P2`—engage the other robots.
+The dashboard shows positions, battery levels, job progress, evidence citations,
+and events. Its environment controls add or remove obstacles without revealing the
+change to the planner until a robot observes it.
 
-| Component | Intended responsibility |
-| --- | --- |
-| Generative AI / LLMs | Interpret requests and corrections; generate targeted questions and evidence-supported explanations. |
-| Agentic orchestration | Persist conversations, call bounded tools, dispatch validated tasks, monitor execution, and recover from failures. |
-| RAG | Retrieve applicable, versioned procedures and handling instructions with source attribution. |
-| Speech / NLP | Transcribe voice messages, resolve task entities, manage conversational turns, and generate spoken replies. |
+## Run it locally
 
-### Execution and research components
+Requirements: Python 3.12 and [uv](https://docs.astral.sh/uv/getting-started/installation/).
+The default demonstration needs no API key, model download, microphone, or robot hardware.
 
-| Component | Intended responsibility |
-| --- | --- |
-| Optimization | Feasible task allocation, scheduling, route reservations, and charging decisions. |
-| Reinforcement learning | An experimental clarification policy: ask, inspect more information, proceed with a validated task, or defer. |
-| Robotics simulation | Three mobile robots transporting standardized totes under changing conditions and partial observations. |
-
-One conversational coordinator invokes specialized tools; individual robots execute structured missions and share observations. Separate LLM instances per robot are not required. Live operational facts come from structured state tools, not from treating document retrieval as a real-time database.
-
-## Target operational boundaries
-
-- Operational overrides require an authorized issuer, scope, and expiry. They cannot override protective stopping, collision constraints, payload limits, or battery protection.
-- Enforced rules have validated structured representations; retrieved prose does not automatically become an executable rule.
-- Requested, accepted, scheduled, executing, and completed are distinct states. Completion requires execution evidence.
-- Recorded commands require timestamps, expiry handling, and duplicate protection.
-- The first simulation assumes standardized totes and station-based loading/unloading. Robot arms, forklifts, and physical deployment are outside the initial release scope.
-- Unknown or stale observations remain uncertain; privileged simulator truth must not leak into the agent's operational observations.
-
-## Design principles
-
-**Language proposes; validated tools determine admissibility.** The LLM extracts task intent. It cannot assign itself permissions, relax payload limits, calculate route feasibility, or report unobserved task completion. The current deterministic guards cover the synthetic fixture; they are not a comprehensive safety system.
-
-**Grounding has two sources.** RAG supplies procedural evidence; structured state supplies known tote identities and locations. Model-generated identifiers absent from operator text trigger clarification. Operator confirmation remains necessary because schema validity alone does not establish correct interpretation.
-
-**Clarification is part of the task.** A correction invalidates the pending candidate, including when re-interpretation fails. Confirmation rechecks current fixture state and permissions. Accepted specifications do not imply scheduled or completed physical work.
-
-**Evidence before claims.** Runnable behavior, adapter contracts, research hypotheses, and future capabilities have separate status labels. Reproducible engineering tests precede claims about task efficiency or model quality.
-
-## Planned optimization and learning formulation
-
-The physical planning extension will minimize priority-weighted lateness with secondary energy and travel costs:
-
-$$
-\min \mathbb{E}\left[\sum_j w_j\max(0,C_j-d_j)+\lambda_E E+\lambda_D D\right].
-$$
-
-Here, completion time is $C_j$, deadline is $d_j$, task priority weight is $w_j$, energy is $E$, and travel distance is $D$. Units, scaling, horizon, and tradeoff weights must be specified before experiments.
-
-Constraints will cover task assignment, pickup-before-delivery, payload capacity, access permissions, charger capacity, energy reserves, and spatial/temporal route conflicts. Collision protection remains an independent execution responsibility under uncertain observations. This is a design formulation; no solver is implemented in M1.
-
-The RL extension will study **ask, inspect, proceed with a validated task, or defer** decisions using observable dialogue and warehouse state. Rewards will penalize wrong actions, delays, and excessive operator interruptions. Hard authorization and protective constraints remain outside the learned policy. Baselines and held-out tasks must be fixed before reporting improvement.
-
-## Research and evaluation
-
-**Proposed primary question:** Can grounded conversational orchestration improve correct warehouse task execution under ambiguous instructions and changing conditions while limiting operator interruptions?
-
-Candidate comparisons include structured forms, an LLM without RAG, RAG with fixed clarification rules, and an agent with a learned clarification policy. Comparisons should hold the execution backend and scenario distribution constant where applicable. Structured forms provide a reference for explicit task specification rather than a directly equivalent conversational interface.
-
-Primary measures: correct task interpretation, retrieval relevance, evidence support, wrong-command execution, unauthorized override acceptance, clarification usefulness, questions per task, end-to-end success, recovery success, latency, and inference cost.
-
-Operational measures: weighted lateness, throughput, travel, energy, collisions, near misses, and deadlocks. Speech evaluation includes task-critical identifier errors as well as transcription error rates.
-
-**Engineering verification:** 35 tests pass locally, covering conversation scenarios, API validation, policy guards, retrieval filtering, and mocked model contracts. This is software verification, not an experimental performance claim. No RL, retrieval-quality, live-LLM, or human-user benchmark has been executed. Future reports must include baselines, seeds, held-out scenarios, model/configuration versions, uncertainty estimates, and limitations.
-
-## Technology stack and planned extensions
-
-| Layer | Candidate technology |
-| --- | --- |
-| API and validation | Implemented: Python 3.12, FastAPI, Pydantic |
-| Stateful orchestration | Implemented: bounded in-memory workflow; planned: LangGraph persistence |
-| LLM and speech | Local Ollama text adapter implemented; model validation and speech remain planned |
-| Retrieval | Implemented: lexical overlap with versioned synthetic sources; hybrid/vector retrieval remains planned |
-| Persistence | In-memory sessions now; SQLite persistence planned |
-| Planning | Planned: OR-Tools CP-SAT and reservation-based route planning |
-| Simulation and learning | Planned: Gymnasium-compatible environment and PyTorch RL experiments |
-| Quality and reproducibility | pytest, Ruff, mypy, uv lockfile, and GitHub Actions workflow |
-
-Installed dependencies are pinned in `pyproject.toml` and `uv.lock`. Planned technologies are not installed merely to appear in the stack.
-
-## Getting started
-
-Requirements: Python 3.12 and uv. From the repository root:
-
-```sh
+```bash
+git clone https://github.com/mazyartaghavi/cooperative-warehouse-intelligence.git
+cd cooperative-warehouse-intelligence
 uv sync --locked
 uv run cwi-demo
 ```
 
-The demo uses a **rules baseline, not an LLM**, and resolves a blue-tote ambiguity before asking for explicit confirmation. See the [actual demo transcript](assets/m1-demo.txt).
+Start the dashboard on **http://127.0.0.1:8000**:
 
-For the authenticated local API, Windows PowerShell instructions, and optional Ollama setup, see [development instructions](docs/development.md). No model or paid API is needed for the offline demo. Speech, planning, and robot dispatch are not yet available.
+```bash
+export CWI_API_TOKEN="$(python -c 'import secrets; print(secrets.token_urlsafe(24))')"
+uv run uvicorn cwi.api.app:app_factory --factory --host 127.0.0.1 --port 8000 --workers 1
+```
 
-## Repository structure
+Enter the same token in the dashboard. Choose a local token you can paste, or print
+your generated token privately before starting the server. It represents one demo
+operator; it is not a GitHub or model-provider credential.
 
-| Path | Purpose |
-| --- | --- |
-| `src/cwi/conversation/` | Intent, entities, dialogue state, corrections, and clarification. |
-| `src/cwi/agents/` | Persistent orchestration, tool calls, and recovery. |
-| `src/cwi/retrieval/` | Procedure ingestion, retrieval, filtering, and citations. |
-| `src/cwi/speech/` | Recorded/live speech input and spoken responses. |
-| `src/cwi/policy/` | Authorization, overrides, and structured rule enforcement. |
-| `src/cwi/state/` | Tasks, observations, freshness, and execution events. |
-| `src/cwi/planning/` | Assignment, scheduling, route reservations, and charging. |
-| `src/cwi/simulation/` | Warehouse dynamics, observations, and robot execution. |
-| `src/cwi/rl/` | Offline clarification-policy experiments. |
-| `src/cwi/evaluation/` | Metrics, baselines, scenario replay, and reports. |
-| `src/cwi/api/` | Operator and robot-facing service interfaces. |
-| `configs/`, `data/`, `experiments/` | Configuration, synthetic fixtures, and experiment outlines. |
-| `tests/` | Executable unit, API, scenario, and model-contract tests. |
-| `docs/`, `assets/` | Design, roadmap, and future verified demonstrations. |
+For PowerShell:
 
-## Roadmap
+```powershell
+$env:CWI_API_TOKEN = "choose-a-private-local-token-of-at-least-16-characters"
+uv run uvicorn cwi.api.app:app_factory --factory --host 127.0.0.1 --port 8000 --workers 1
+```
 
-1. **M1 — Text-to-task foundation:** available baseline and API; validate the local LLM on annotated instructions next.
-2. **M2 — Dynamic warehouse execution:** accepted tasks become constrained missions for three simulated robots.
-3. **M3 — Speech interaction:** recorded messages, live microphone turns, spoken replies, corrections, and noise evaluation.
-4. **M4 — Reliable agentic operation:** persistent workflows, conflicts, execution recovery, and reconnect behavior.
-5. **M5 — Research evaluation:** learned clarification, controlled ablations, operational metrics, and reproducible reports.
-6. **M6 — Hardware preparation:** robot adapters, sensor/interface requirements, and a physical validation plan.
+Click **Connect**, send `Move the blue tote to P2`, clarify `T17`, and confirm. Click
+**Run simulation** to advance time. `.env.example` documents settings; environment
+files are not loaded automatically. [Development guide](docs/development.md).
 
-See [milestone completion criteria and known issues](docs/ROADMAP.md).
+## What each technology does
 
-## API and reproducibility
+| Field | Implemented role | Boundary |
+|---|---|---|
+| **Generative AI / LLMs** | Local Ollama adapter extracts schema-constrained transport intents and generates answers from retrieved procedures | Model responses are untrusted; no direct robot commands |
+| **Agentic workflows** | LangGraph retrieves evidence, proposes intent, and invokes policy validation; a durable conversation manages clarification and confirmation | Bounded coordinator graph, not three independent conversational LLMs |
+| **RAG** | BM25 retrieves active, warehouse-scoped procedure records from a versioned SQLite corpus; answers carry source IDs, versions, and excerpts | Small synthetic corpus; no claim of a production knowledge base |
+| **Speech / NLP** | Microphone and file capture, optional faster-whisper transcription, transcript review, browser text-to-speech | Speech requires local model files; browser voices may depend on the operating system |
+| **Optimization** | OR-Tools CP-SAT task assignment with feasibility checks and travel/lateness costs; repeated grid routing and conservative reservations | Optimality concerns the bounded assignment problem, not the full warehouse schedule |
+| **Robotics** | Three robot state machines, tote pickup/delivery, shared local observations, dynamic obstacles, battery use and charging | Discrete 2D simulation; no hardware driver or physics engine |
+| **Reinforcement learning** | Seeded Q-learning for uncertainty resolution, connected to blocked-aisle inspection or operator feedback; two fixed-policy baselines | Synthetic training model; deployed inspection decisions retain independent energy and resource guards |
 
-| Route | Purpose |
-| --- | --- |
-| `GET /health` | Runtime/backend status; explicitly reports no robot dispatch |
-| `POST /sessions` | Create a conversation for the configured demo operator |
-| `POST /sessions/{session_id}/messages` | Submit an instruction, clarification, correction, confirmation, or cancellation |
+The offline rules parser is a reproducibility baseline, **not an LLM**. Select the
+Ollama backend to exercise generative inference. A model failure returns an error;
+the service does not quietly switch to rules and label the result as generated.
 
-Protected routes require `X-CWI-Token`. Credentials and role are configured by the server, not supplied as trusted fields in the request body. Start with a loopback binding and one worker; this is a local prototype.
+## Enable the LLM and voice paths
 
-```sh
+With Ollama running locally and a model already installed:
+
+```bash
+export CWI_BACKEND=ollama
+export CWI_OLLAMA_MODEL=your-installed-model-name
+# Restart the API with the same startup command.
+```
+
+The endpoint must be local. Both intent extraction and procedure Q&A use structured
+outputs. A schema and valid citation IDs do not establish semantic correctness;
+operators review grounded task details before confirming.
+
+To enable recorded messages and live microphone utterances:
+
+```bash
+uv sync --locked --extra voice
+export CWI_WHISPER_MODEL=/absolute/path/to/local/faster-whisper-model
+# Restart the API. Recording requires localhost or HTTPS and microphone permission.
+```
+
+Models are not downloaded automatically. Recordings are limited to 60 seconds and
+10 MiB; temporary decoding files are removed. A transcript goes into the instruction
+box for review, then follows the same clarification and confirmation process as
+text. The browser can read replies aloud. This is turn-based spoken interaction,
+not always-listening, full-duplex voice or visual face recognition.
+
+## Architecture
+
+```mermaid
+flowchart TD
+    H["Operator: text or speech"] --> T["Reviewed transcript"]
+    T --> G["LangGraph coordinator"]
+    K["Versioned procedures"] --> R["BM25 retrieval"]
+    R --> G
+    S["Observed warehouse state"] --> G
+    G --> L["LLM intent proposal"]
+    L --> V["Policy and state validation"]
+    V --> C["Clarify or confirm"]
+    C --> H
+    C --> Q["Confirmed task queue"]
+    Q --> O["CP-SAT assignment"]
+    O --> E["Routing and robot execution"]
+    E --> S
+    E --> A["Audit events and SQLite checkpoint"]
+```
+
+The simulation starts with known stations and inventory, including two blue totes.
+Dynamic obstacles are partially observable: robots sense their adjacent cells and
+share discoveries. Unknown space is provisionally traversable; immediate sensing
+precedes movement. Active inspection can extend sensing to radius three when routing is blocked, at an energy cost. Every move respects occupied starting cells and reserved target
+cells, so robots cannot occupy one cell or swap positions in a tick.
+
+[Architecture and state ownership](docs/architecture/README.md) ·
+[Warehouse model](docs/warehouse-execution.md) ·
+[Research formulation](docs/research/README.md)
+
+## Operational rules
+
+- **Ambiguity:** unknown tote IDs, multiple blue totes, and missing destinations
+  require clarification. An LLM cannot invent an unmentioned explicit ID.
+- **Confirmation:** a correction invalidates the earlier proposal. State and
+  authorization are checked again when the operator confirms.
+- **Authority:** the server assigns the role. Supervisors can request urgent
+  priority or transport to Q1. Chat messages cannot grant supervisor privileges.
+- **Hard constraints:** the 50 kg payload ceiling and movement protection cannot
+  be overridden by operator language. T31 is deliberately overweight for rejection tests.
+- **Coordination:** one active transport per tote, one job per robot, and an
+  idempotency key prevent duplicate work. Accepted is distinct from delivered.
+- **Energy:** assignment budgets pickup, delivery, charger return, and reserve.
+  Charging occupies the robot's dedicated home cell. New detours can invalidate
+  initial estimates; this prototype does not prove recursive energy feasibility.
+- **Persistence:** sessions, pending confirmations, jobs, robots, and environment
+  state share a SQLite checkpoint. Run one API worker with one configured operator.
+
+Procedure text supports interpretation and explanation. Deterministic Python policy
+remains authoritative. Changing prose in the database does not silently rewrite
+access control or protective behavior.
+
+## Experiments and evidence
+
+```bash
+uv run cwi-evaluate --output outputs/evaluation.json --policy outputs/clarification-policy.json
 uv run pytest -q
 uv run ruff check .
 uv run ruff format --check .
 uv run mypy
 ```
 
-[Verification notes](docs/verification.md) distinguish local test results from live-model and robotics validation. The CI workflow runs without model weights, secrets, or paid inference.
+[Recorded evaluation output](assets/evaluation.json) includes:
 
-## Limitations and future work
+- Static and dynamic warehouse scenarios with all three tote deliveries completed.
+- Actual distance, waiting, lateness, local observations, and conversation transcripts.
+- A five-query retrieval sanity check over the synthetic corpus.
+- Five training seeds for tabular Q-learning, 5,000 training episodes per seed,
+  and 1,000 evaluation episodes per seed, with mean and sample standard deviation.
+- Comparisons with `always_ask` and `inspect_when_possible` clarification policies.
 
-M1 is a single-process text-to-task demo with synthetic inventory and procedures. The offline parser has a limited English grammar, responses use templates, and the Ollama adapter has not been tested against a live model here. Sessions do not survive restarts. Research novelty and performance improvements remain hypotheses. Warehouse noise, overlapping speech, uncertain localization, communication failures, load transfer, and human safety require explicit evaluation before hardware claims are appropriate.
+The learning experiment uses assumed inspection reliability and human interruption
+costs. Its returns are **synthetic reward units**, not warehouse productivity gains.
+Select `CWI_ASSISTANCE_POLICY=q_learning` to use the packaged learned policy for blocked-route assistance. The default is `inspect_when_possible`.
 
-Physical deployment would additionally require site-specific risk assessment, independent protective systems, suitable hardware, and validation with operators. Simulation outcomes do not establish deployment readiness.
+A strong inspection heuristic is an essential comparator: beating `always_ask`
+alone does not establish that learning is necessary.
 
-## Author
+Optional live model evaluation:
 
-[Mazyar Taghavi](https://github.com/mazyartaghavi) — project design and development.
+```bash
+uv run cwi-evaluate-llm --model your-installed-model-name --output outputs/live-language.json
+```
 
-See [contribution guidance](CONTRIBUTING.md) for milestone and evidence requirements. No software license has been selected; do not assume reuse permissions beyond those provided by applicable law.
+This command records the actual model, responses, errors, latency, and exact-case
+accuracy. No live model score is published without an actual run.
+[Verification record and limitations](docs/verification.md).
+
+## Repository guide
+
+| Location | Contents |
+|---|---|
+| `src/cwi/agents` | Bounded graph and durable conversation service |
+| `src/cwi/conversation` | Typed task contracts, baseline/LLM adapters, grounded Q&A |
+| `src/cwi/retrieval` | Active-version filtering and BM25 retrieval |
+| `src/cwi/policy` | Authorization, ambiguity and payload guards |
+| `src/cwi/planning` | CP-SAT assignment and grid routing |
+| `src/cwi/simulation` | Three-robot environment, observations, execution and metrics |
+| `src/cwi/state` | Warehouse records and SQLite persistence |
+| `src/cwi/speech` | Optional local speech transcription |
+| `src/cwi/api` | Authenticated API and browser dashboard |
+| `src/cwi/rl` | Masked clarification environment and Q-learning |
+| `src/cwi/evaluation` | Reproducible warehouse, retrieval and language experiments |
+| `tests` | Behavioral, integration, persistence and model-contract tests |
+| `docs` | Architecture, mathematical formulation, development and verification |
+| `assets` | Recorded synthetic experiments and learned policy artifact |
+
+## Research and engineering questions
+
+1. Can retrieval-grounded structured generation reduce invalid task proposals
+   compared with a rules baseline and an LLM without retrieved evidence?
+2. When should a coordinator ask a human versus acquire another observation?
+   Does learning improve on a well-designed fixed inspection policy?
+3. How do partial observations and conservative movement reservations affect
+   delay, energy expenditure, and throughput under changing layouts?
+
+The repository supplies the experimental foundation; it does not claim a novel
+algorithm, statistical superiority on real warehouses, or a publishable result
+without further controlled experiments and independent evidence.
+
+## From simulation to a warehouse
+
+A real deployment needs robot-specific localization and sensing, continuous-time
+motion planning, braking-distance and human-separation constraints, protected
+stop hardware, payload/docking validation, warehouse-management integration,
+operator identity management, noisy-speech evaluation, and hardware-in-the-loop
+trials. Networking delays, stale observations, deadlocks, blocked chargers, and
+interrupted missions need measured recovery behavior. These are substantial
+engineering tasks, not configuration switches in this simulator.
+
+The present prototype uses standard totes and fixed pickup/delivery stations.
+It does not implement arbitrary-object grasping, a ROS 2/Nav2 driver, SLAM,
+production authentication, or certified industrial safety functions.
+
+[Development and deployment](docs/development.md) ·
+[Milestones and remaining validation](docs/ROADMAP.md) ·
+[Contribution guide](CONTRIBUTING.md)
+
+## Technical references
+
+- [LangGraph graph API](https://docs.langchain.com/oss/python/langgraph/graph-api)
+- [OR-Tools assignment modeling](https://developers.google.com/optimization/assignment/assignment_example)
+- [Ollama structured outputs](https://docs.ollama.com/capabilities/structured-outputs)
+- [faster-whisper](https://github.com/SYSTRAN/faster-whisper)
+
+Created by [Mazyar Taghavi](https://github.com/mazyartaghavi).

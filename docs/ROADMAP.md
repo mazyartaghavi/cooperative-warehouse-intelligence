@@ -1,44 +1,28 @@
-# Capability status and roadmap
+# Milestones and validation
 
-## Current snapshot
+The approved subject is **Cooperative Warehouse Intelligence**, with GenAI, agentic
+workflows, LLMs and RAG as the primary focus. Implementation is simulation-first.
 
-- Completed: approved subject, title, GenAI-first design, recruiter-facing project overview, directory/module outlines, and initial repository publication.
-- Current milestone: M1 text-to-task foundation merged into main (PR #1); live-model validation remains pending.
-- Next: validate an installed local model, then implement M2 robot execution simulation.
-- Implemented: text API, synthetic observed state, lexical retrieval, clarification/correction, deterministic policy checks, confirmation, and a runnable offline baseline.
-- Experimental: Ollama structured extraction adapter is contract-tested; live-model evaluation is pending.
-- Planned: speech, persistent LangGraph orchestration, hybrid retrieval, dynamic robotics, optimization, and RL.
+| Milestone | Delivered software | Evidence |
+|---|---|---|
+| Foundation | Installable Python package, quality tooling, GitHub root README | Original foundation and PR #1 |
+| Grounded conversations | Strict intents, active procedures, clarification, corrections, confirmation and role checks | Behavioral and mocked model-contract tests |
+| Cooperative execution | Three robots, CP-SAT assignment, partially observed obstacles, routing, charging, SQLite checkpoints | Static/dynamic delivery scenarios and collision/restart tests |
+| Operator interface | Browser dashboard, microphone/file controls, transcription adapter, text-to-speech controls, grounded Q&A | API/adapter contracts; real browser smoke workflow |
+| Learned assistance | Seeded Q-learning, fixed-policy baselines, bounded active inspection or operator feedback | Synthetic experiments and integrated stale-obstacle fixture |
+| Research package | Mathematical model, documented assumptions, recorded JSON results, live model evaluation command | Reproduction commands and verification record |
 
-## Milestones
+## External validation still required
 
-| Milestone | Scope | Completion evidence | Status |
-| --- | --- | --- | --- |
-| M0 | Documentation and repository scaffold | Reviewed files and verified GitHub publication | Published |
-| M1 | Text conversation, procedure retrieval, validated task extraction and clarification | Runnable baseline, source citations, 35 passing tests; live LLM validation pending | Implemented baseline; LLM adapter experimental |
-| M2 | Three-robot dynamic warehouse and planning | End-to-end task execution, changing obstacles, observable status, and reservation checks | Planned |
-| M3 | Recorded and live voice | Transcription, spoken replies, corrections, and measured identifier/noise errors | Planned |
-| M4 | Agent reliability | Recovery, cancellation, conflicting orders, duplicate protection, persistence, and reconnect scenarios | Planned |
-| M5 | RL clarification study | Fixed-rule baselines, held-out evaluation, multiple seeds, and transparent reports | Planned |
-| M6 | Hardware preparation | Documented adapter contract and physical validation plan | Planned |
+- Install and evaluate actual LLM and speech model weights on the intended machine;
+  measure instruction accuracy, uncertainty handling, noisy speech and response latency.
+- Add broader layouts/workloads, held-out linguistic examples, retrieval ablations,
+  alternative MAPF/scheduling baselines and calibrated human interruption costs.
+- Validate human interaction with actual operators before claiming fluent industrial use.
+- Physical deployment requires localization, perception, robot drivers, docking,
+  continuous control, protected stopping and human-separation validation. This is
+  a separate engineering program, not a completed feature of the 2D prototype.
 
-## Next milestone and known issues
-
-- Validate an installed Ollama model against annotated task scenarios before expanding the conversational backend.
-- Then M2: connect accepted specifications to a three-robot simulation and constrained planning.
-- Speech, vector retrieval, LangGraph persistence, model-quality benchmarks, and production deployment remain absent.
-- Local test dependencies emit two upstream deprecation warnings (Starlette/httpx and AnyIO); tests pass. These warnings are not suppressed.
-- One demo token maps to one server-configured operator; sessions are in memory and requests serialized. This is not multi-user production authentication.
-- Software license, hardware access, and model compute budget remain open decisions.
-
-## Planned experiments
-
-1. Procedure-grounding ablation with and without retrieval.
-2. Fixed clarification rules versus learned clarification, measuring operator workload and task correctness.
-3. Persistent agent recovery versus a single planning call on identical injected failures.
-4. Robustness to unseen layouts/procedures, stale observations, speech noise, and ambiguous identifiers.
-
-Keep all benchmark inputs separated from policy training. Do not treat an LLM's self-reported confidence as a calibrated uncertainty estimate. Report simulated-human and real-human evaluations separately.
-
-## Milestone completion policy
-
-Replace a module outline only when its implementation is reviewable. Record verification evidence, update this file and README status in the same change, and use a focused branch/PR. Do not add passing badges, fabricated screenshots, or placeholder benchmark values. Future automation should reflect actual tests rather than tests of empty stubs.
+The software milestones above replace the original placeholders. They do not imply
+completion of live-model studies, industrial safety validation, or real warehouse
+hardware integration. See [verification](verification.md) for checks actually run.
