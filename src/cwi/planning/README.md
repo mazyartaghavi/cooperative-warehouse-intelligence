@@ -1,17 +1,5 @@
-# Constrained planning
+# Assignment and routing
 
-**Status: PLANNED — module outline only.**
+`scheduler.py` models one-job/one-robot assignment in OR-Tools CP-SAT and provides BFS grid routes. Battery/route feasibility is computed by the simulator before candidate edges are supplied. Global multi-agent routing is a conservative heuristic, not an optimal MAPF solver.
 
-## Purpose
-
-Assignment, scheduling, charging, and reservation-based routes.
-
-## Intended contract
-
-Validated orders and observed resources → feasible mission plan or infeasibility reason.
-
-## Completion evidence
-
-Capacity, precedence, charging reserves, route conflicts, and infeasibility checked.
-
-Implementation, configuration, and tests will accompany the corresponding roadmap milestone.
+See the [project README](../../../README.md) for startup, evidence and scope.

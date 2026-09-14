@@ -1,0 +1,352 @@
+{
+  "warehouse": [
+    {
+      "scenario": "static",
+      "metrics": {
+        "distance": 82,
+        "inspections": 0,
+        "operator_questions": 0,
+        "waits": 6,
+        "completed": 3,
+        "tardiness": 0
+      },
+      "deliveries": [
+        {
+          "tote": "T17",
+          "status": "completed",
+          "tick": 24
+        },
+        {
+          "tote": "T23",
+          "status": "completed",
+          "tick": 15
+        },
+        {
+          "tote": "T42",
+          "status": "completed",
+          "tick": 15
+        }
+      ],
+      "observations": 0,
+      "transcript": [
+        {
+          "operator": "Move the blue tote to P2",
+          "status": "clarification",
+          "reply": "Which tote do you mean? Observed: T17, T23."
+        },
+        {
+          "operator": "T17",
+          "status": "awaiting_confirmation",
+          "reply": "Confirm T17 from A to P2, normal priority? Reply 'confirm' or correct it."
+        },
+        {
+          "operator": "confirm",
+          "status": "accepted",
+          "reply": "Task queued for simulated robot execution. Watch the warehouse for progress."
+        },
+        {
+          "operator": "Move T23 to P1",
+          "status": "awaiting_confirmation",
+          "reply": "Confirm T23 from A to P1, normal priority? Reply 'confirm' or correct it."
+        },
+        {
+          "operator": "confirm",
+          "status": "accepted",
+          "reply": "Task queued for simulated robot execution. Watch the warehouse for progress."
+        },
+        {
+          "operator": "Move T42 to P2",
+          "status": "awaiting_confirmation",
+          "reply": "Confirm T42 from B to P2, normal priority? Reply 'confirm' or correct it."
+        },
+        {
+          "operator": "confirm",
+          "status": "accepted",
+          "reply": "Task queued for simulated robot execution. Watch the warehouse for progress."
+        }
+      ]
+    },
+    {
+      "scenario": "dynamic",
+      "metrics": {
+        "distance": 80,
+        "inspections": 0,
+        "operator_questions": 0,
+        "waits": 6,
+        "completed": 3,
+        "tardiness": 0
+      },
+      "deliveries": [
+        {
+          "tote": "T17",
+          "status": "completed",
+          "tick": 22
+        },
+        {
+          "tote": "T23",
+          "status": "completed",
+          "tick": 15
+        },
+        {
+          "tote": "T42",
+          "status": "completed",
+          "tick": 15
+        }
+      ],
+      "observations": 1,
+      "transcript": [
+        {
+          "operator": "Move the blue tote to P2",
+          "status": "clarification",
+          "reply": "Which tote do you mean? Observed: T17, T23."
+        },
+        {
+          "operator": "T17",
+          "status": "awaiting_confirmation",
+          "reply": "Confirm T17 from A to P2, normal priority? Reply 'confirm' or correct it."
+        },
+        {
+          "operator": "confirm",
+          "status": "accepted",
+          "reply": "Task queued for simulated robot execution. Watch the warehouse for progress."
+        },
+        {
+          "operator": "Move T23 to P1",
+          "status": "awaiting_confirmation",
+          "reply": "Confirm T23 from A to P1, normal priority? Reply 'confirm' or correct it."
+        },
+        {
+          "operator": "confirm",
+          "status": "accepted",
+          "reply": "Task queued for simulated robot execution. Watch the warehouse for progress."
+        },
+        {
+          "operator": "Move T42 to P2",
+          "status": "awaiting_confirmation",
+          "reply": "Confirm T42 from B to P2, normal priority? Reply 'confirm' or correct it."
+        },
+        {
+          "operator": "confirm",
+          "status": "accepted",
+          "reply": "Task queued for simulated robot execution. Watch the warehouse for progress."
+        }
+      ]
+    }
+  ],
+  "retrieval": {
+    "fixture_queries": 5,
+    "top1_accuracy": 1.0,
+    "limitation": "Tiny hand-authored synthetic fixture; not a held-out language benchmark."
+  },
+  "integrated_assistance": [
+    {
+      "policy": "q_learning",
+      "metrics": {
+        "distance": 32,
+        "inspections": 1,
+        "operator_questions": 0,
+        "waits": 1,
+        "completed": 1,
+        "tardiness": 0
+      },
+      "job_status": "completed",
+      "fixture": "Previously observed barrier has a hidden nearby opening; operator busy"
+    },
+    {
+      "policy": "always_ask",
+      "metrics": {
+        "distance": 0,
+        "inspections": 0,
+        "operator_questions": 20,
+        "waits": 100,
+        "completed": 0,
+        "tardiness": 0
+      },
+      "job_status": "carrying",
+      "fixture": "Previously observed barrier has a hidden nearby opening; operator busy"
+    },
+    {
+      "policy": "inspect_when_possible",
+      "metrics": {
+        "distance": 32,
+        "inspections": 1,
+        "operator_questions": 0,
+        "waits": 1,
+        "completed": 1,
+        "tardiness": 0
+      },
+      "job_status": "completed",
+      "fixture": "Previously observed barrier has a hidden nearby opening; operator busy"
+    }
+  ],
+  "clarification": {
+    "train_seeds": [
+      7,
+      17,
+      27,
+      37,
+      47
+    ],
+    "episodes_per_seed": 5000,
+    "evaluation_episodes_per_seed": 1000,
+    "results": {
+      "q_learning": {
+        "mean_return": {
+          "mean": 8.0092,
+          "std": 0.021309035642187273
+        },
+        "asks_per_episode": {
+          "mean": 0.4972,
+          "std": 0.008348652585896729
+        },
+        "inspections_per_episode": {
+          "mean": 0.2248,
+          "std": 0.022015903342811075
+        },
+        "success_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        }
+      },
+      "always_ask": {
+        "mean_return": {
+          "mean": 7.3456,
+          "std": 0.05746999216982719
+        },
+        "asks_per_episode": {
+          "mean": 0.664,
+          "std": 0.00961769203083568
+        },
+        "inspections_per_episode": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "success_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        }
+      },
+      "inspect_when_possible": {
+        "mean_return": {
+          "mean": 8.0119,
+          "std": 0.0350203512261084
+        },
+        "asks_per_episode": {
+          "mean": 0.32680000000000003,
+          "std": 0.008348652585896729
+        },
+        "inspections_per_episode": {
+          "mean": 0.4502,
+          "std": 0.017079227148791027
+        },
+        "success_rate": {
+          "mean": 1.0,
+          "std": 0.0
+        }
+      }
+    },
+    "per_seed": {
+      "q_learning": [
+        {
+          "mean_return": 7.979,
+          "asks_per_episode": 0.51,
+          "inspections_per_episode": 0.198,
+          "success_rate": 1.0
+        },
+        {
+          "mean_return": 8.021,
+          "asks_per_episode": 0.497,
+          "inspections_per_episode": 0.246,
+          "success_rate": 1.0
+        },
+        {
+          "mean_return": 8.0325,
+          "asks_per_episode": 0.494,
+          "inspections_per_episode": 0.213,
+          "success_rate": 1.0
+        },
+        {
+          "mean_return": 8.017,
+          "asks_per_episode": 0.498,
+          "inspections_per_episode": 0.218,
+          "success_rate": 1.0
+        },
+        {
+          "mean_return": 7.9965,
+          "asks_per_episode": 0.487,
+          "inspections_per_episode": 0.249,
+          "success_rate": 1.0
+        }
+      ],
+      "always_ask": [
+        {
+          "mean_return": 7.352,
+          "asks_per_episode": 0.664,
+          "inspections_per_episode": 0.0,
+          "success_rate": 1.0
+        },
+        {
+          "mean_return": 7.34,
+          "asks_per_episode": 0.672,
+          "inspections_per_episode": 0.0,
+          "success_rate": 1.0
+        },
+        {
+          "mean_return": 7.428,
+          "asks_per_episode": 0.648,
+          "inspections_per_episode": 0.0,
+          "success_rate": 1.0
+        },
+        {
+          "mean_return": 7.342,
+          "asks_per_episode": 0.665,
+          "inspections_per_episode": 0.0,
+          "success_rate": 1.0
+        },
+        {
+          "mean_return": 7.266,
+          "asks_per_episode": 0.671,
+          "inspections_per_episode": 0.0,
+          "success_rate": 1.0
+        }
+      ],
+      "inspect_when_possible": [
+        {
+          "mean_return": 7.9665,
+          "asks_per_episode": 0.34,
+          "inspections_per_episode": 0.433,
+          "success_rate": 1.0
+        },
+        {
+          "mean_return": 8.0525,
+          "asks_per_episode": 0.317,
+          "inspections_per_episode": 0.465,
+          "success_rate": 1.0
+        },
+        {
+          "mean_return": 8.0415,
+          "asks_per_episode": 0.326,
+          "inspections_per_episode": 0.431,
+          "success_rate": 1.0
+        },
+        {
+          "mean_return": 8.002,
+          "asks_per_episode": 0.327,
+          "inspections_per_episode": 0.456,
+          "success_rate": 1.0
+        },
+        {
+          "mean_return": 7.997,
+          "asks_per_episode": 0.324,
+          "inspections_per_episode": 0.466,
+          "success_rate": 1.0
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "Synthetic simulator and synthetic clarification transitions",
+    "No live LLM inference, microphone, or physical robot evaluation",
+    "Inspection probability and interruption costs are assumed"
+  ]
+}

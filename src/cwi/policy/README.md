@@ -1,5 +1,5 @@
-# Policy
+# Execution authority
 
-Implemented: server-configured role checks, payload and restricted-destination guards, explicit safety-bypass detection, and observed-ID validation. These fixture checks do not certify robot safety.
+`validation.py` checks transport ambiguity, explicit IDs, known destinations, payload and server-assigned role. Supervisors can request urgent priority and Q1 access but cannot override protective constraints. Confirmation rechecks state and authority.
 
-See [development instructions](../../../docs/development.md) for setup and limitations.
+See the [project README](../../../README.md) for startup, evidence and scope.

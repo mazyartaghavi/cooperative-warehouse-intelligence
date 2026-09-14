@@ -1,0 +1,16 @@
+Cooperative Warehouse Intelligence — OFFLINE RULES BASELINE (no LLM)
+
+Operator: Move the blue tote to P2
+Coordinator [clarification]: Which tote do you mean? Observed: T17, T23.
+Evidence: TRANSPORT@1.0, ACCESS@1.0, PAYLOAD@1.0, OBSERVATION@current
+
+Operator: T17
+Coordinator [awaiting_confirmation]: Confirm T17 from A to P2, normal priority? Reply 'confirm' or correct it.
+Evidence: TRANSPORT@1.0, ACCESS@1.0, PAYLOAD@1.0, OBSERVATION@current
+
+Operator: confirm
+Coordinator [accepted]: Task queued for simulated robot execution. Watch the warehouse for progress.
+Evidence: TRANSPORT@1.0
+
+Simulated result: completed
+Metrics: {'distance': 28, 'inspections': 0, 'operator_questions': 0, 'waits': 0, 'completed': 1, 'tardiness': 0}

@@ -54,7 +54,11 @@ class ConversationService:
                 raise ValueError("Demo session limit reached; restart the service.")
             identifier = str(uuid4())
             self.sessions[identifier] = Session()
-            self.persist()
+            try:
+                self.persist()
+            except Exception:
+                del self.sessions[identifier]
+                raise
             return identifier
 
     def checkpoint(self) -> dict[str, Any]:
@@ -80,7 +84,13 @@ class ConversationService:
             for sid, s in data["sessions"].items()
         }
         if data["world"] is not None:
+            mode = (
+                self.world.assistance_mode
+                if self.world
+                else data["world"].get("assistance_mode", "inspect_when_possible")
+            )
             self.world = World.restore(data["world"])
+            self.world.assistance_mode = mode
             self.warehouse = self.world.warehouse
 
     def persist(self) -> None:

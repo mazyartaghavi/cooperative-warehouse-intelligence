@@ -5,10 +5,12 @@ Robots cannot enter another robot's current cell, even if that robot plans to le
 """
 
 from dataclasses import asdict, dataclass, replace
+from pathlib import Path
 from typing import Any
 
 from cwi.conversation.models import Task
 from cwi.planning.scheduler import Assignment, Cell, assign, route
+from cwi.rl.clarification import Action, ClarificationPolicy
 from cwi.state.warehouse import Warehouse
 
 
@@ -20,6 +22,8 @@ class Robot:
     battery: int = 100
     job: str | None = None
     phase: str = "idle"
+    inspection_attempts: int = 0
+    last_assistance: int = -10
 
 
 @dataclass
@@ -37,7 +41,16 @@ class World:
     height = 8
     reserve = 8
 
-    def __init__(self) -> None:
+    def __init__(self, assistance_mode: str = "inspect_when_possible") -> None:
+        if assistance_mode not in {"q_learning", "always_ask", "inspect_when_possible"}:
+            raise ValueError("Unknown assistance policy")
+        self.assistance_mode = assistance_mode
+        self.operator_busy = False
+        self.assistance_policy = ClarificationPolicy.load(
+            Path(__file__).parent.parent / "rl" / "default_policy.json"
+        )
+        self.inspections = 0
+        self.operator_questions = 0
         self.warehouse = Warehouse()
         self.locations: dict[str, Cell] = {
             "A": (3, 2),
@@ -94,24 +107,62 @@ class World:
             self.hidden.discard(cell)
         # Do not reveal an external environmental change to the planner here.
 
+    def observe(self, robot: Robot, radius: int) -> None:
+        visible = {
+            (x, y)
+            for x in range(self.width)
+            for y in range(self.height)
+            if abs(x - robot.cell[0]) + abs(y - robot.cell[1]) <= radius
+        }
+        discoveries = (self.hidden & visible) - self.known
+        removed = (self.known & visible) - self.hidden
+        self.known = (self.known - visible) | (self.hidden & visible)
+        if discoveries or removed:
+            self.event(
+                "observation",
+                robot=robot.identifier,
+                added=sorted(discoveries),
+                removed=sorted(removed),
+            )
+
     def sense(self) -> None:
         for robot in self.robots:
-            visible = {
-                (x, y)
-                for x in range(self.width)
-                for y in range(self.height)
-                if abs(x - robot.cell[0]) + abs(y - robot.cell[1]) <= 1
-            }
-            discoveries = (self.hidden & visible) - self.known
-            removed = (self.known & visible) - self.hidden
-            self.known = (self.known - visible) | (self.hidden & visible)
-            if discoveries or removed:
-                self.event(
-                    "observation",
-                    robot=robot.identifier,
-                    added=sorted(discoveries),
-                    removed=sorted(removed),
-                )
+            self.observe(robot, 1)
+
+    def resolve_uncertainty(self, robot: Robot) -> None:
+        """Active inspection or operator feedback; never authorizes a movement."""
+        if self.tick - robot.last_assistance < 5:
+            return
+        robot.last_assistance = self.tick
+        action: Action
+        if self.assistance_mode == "q_learning":
+            action = self.assistance_policy.choose((1, int(self.operator_busy)))
+        else:
+            action = "ask" if self.assistance_mode == "always_ask" else "inspect"
+        # Resource guard is independent of learned values.
+        if action == "inspect" and (
+            robot.battery <= self.reserve or robot.inspection_attempts >= 2
+        ):
+            action = "ask"
+        if action == "inspect":
+            robot.battery -= 1
+            robot.inspection_attempts += 1
+            self.inspections += 1
+            self.observe(robot, 3)
+            message = f"{robot.identifier} is inspecting nearby aisles before replanning."
+        else:
+            self.operator_questions += 1
+            message = (
+                f"{robot.identifier} needs assistance (battery {robot.battery}). "
+                "Please check nearby aisle obstructions and clear a route if appropriate."
+            )
+        self.event(
+            "assistance",
+            robot=robot.identifier,
+            action=action,
+            policy=self.assistance_mode,
+            message=message,
+        )
 
     def plan(self) -> None:
         costs: list[Assignment] = []
@@ -150,6 +201,7 @@ class World:
         for assignment in assign(costs):
             robot = next(r for r in self.robots if r.identifier == assignment.robot)
             robot.job, robot.phase = assignment.job, "pickup"
+            robot.inspection_attempts = 0
             self.jobs[assignment.job].status = "assigned"
             self.event("assigned", robot=robot.identifier, job=assignment.job)
 
@@ -216,6 +268,12 @@ class World:
                     self.distance += 1
                 else:
                     self.waits += 1
+                    # Traffic reservations alone are not an observation problem.
+                    globally_blocked = not route(
+                        robot.cell, goal, self.walls | self.known, self.width, self.height
+                    )
+                    if globally_blocked or robot.battery == 0:
+                        self.resolve_uncertainty(robot)
                     self.event(
                         "waiting", robot=robot.identifier, reason="blocked_or_energy_depleted"
                     )
@@ -225,6 +283,8 @@ class World:
     def snapshot(self) -> dict[str, Any]:
         return {
             "tick": self.tick,
+            "assistance_mode": self.assistance_mode,
+            "operator_busy": self.operator_busy,
             "width": self.width,
             "height": self.height,
             "robots": [asdict(r) for r in self.robots],
@@ -235,6 +295,8 @@ class World:
             "jobs": [{**asdict(j), "task": j.task.model_dump()} for j in self.jobs.values()],
             "metrics": {
                 "distance": self.distance,
+                "inspections": self.inspections,
+                "operator_questions": self.operator_questions,
                 "waits": self.waits,
                 "completed": sum(j.status == "completed" for j in self.jobs.values()),
                 "tardiness": sum(
@@ -247,11 +309,18 @@ class World:
         }
 
     def checkpoint(self) -> dict[str, Any]:
-        return {**self.snapshot(), "hidden": sorted(self.hidden), "all_events": self.events}
+        return {
+            **self.snapshot(),
+            "hidden": sorted(self.hidden),
+            "all_events": [dict(event) for event in self.events],
+        }
 
     @classmethod
     def restore(cls, data: dict[str, Any]) -> "World":
-        world = cls()
+        world = cls(data.get("assistance_mode", "inspect_when_possible"))
+        world.operator_busy = data.get("operator_busy", False)
+        world.inspections = data["metrics"].get("inspections", 0)
+        world.operator_questions = data["metrics"].get("operator_questions", 0)
         world.tick = data["tick"]
         world.distance = data["metrics"]["distance"]
         world.waits = data["metrics"]["waits"]

@@ -1,17 +1,5 @@
-# Warehouse robotics simulation
+# Dynamic warehouse
 
-**Status: PLANNED — module outline only.**
+`world.py` implements three robots, tote jobs, local sensing, shared observations, obstacle changes, pickup/delivery, charging and collision-conservative tick reservations. Blocked-route assistance can use the learned policy or a fixed baseline. Public snapshots omit hidden obstacles.
 
-## Purpose
-
-Three tote-transport robots, station transfers, dynamic obstacles, and partial observations.
-
-## Intended contract
-
-Robot actions → observations and task events.
-
-## Completion evidence
-
-Seeded replay, robot footprints, dynamics, occlusion, and independent simulator truth.
-
-Implementation, configuration, and tests will accompany the corresponding roadmap milestone.
+See the [project README](../../../README.md) for startup, evidence and scope.
