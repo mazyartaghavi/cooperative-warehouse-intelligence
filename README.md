@@ -20,6 +20,14 @@ local LLM adapter and optional local speech transcription. The offline demonstra
 uses a clearly identified rules baseline. Physical robot deployment and live model
 quality are separate validation requirements; neither is represented as completed.
 
+## Demo video
+
+**[▶ Watch the warehouse demo (64 seconds)](assets/media/warehouse-demo.mp4)** · [Download MP4](https://github.com/mazyartaghavi/cooperative-warehouse-intelligence/raw/refs/heads/main/assets/media/warehouse-demo.mp4)
+
+1080p, captioned, silent demonstration of operator clarification and three robots
+coordinating warehouse deliveries. This is a replay of recorded simulator states
+with scripted dialogue and the offline rules baseline, not live LLM or hardware footage.
+
 ## See the interaction
 
 ```text
