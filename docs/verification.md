@@ -53,3 +53,15 @@ was evaluated locally. The procedure corpus and warehouse fixtures are synthetic
 Collision checks concern discrete grid cells and ticks, not braking distances or
 industrial human safety. Real-world robustness, prompt-injection resistance,
 production access control and deployment scale remain unestablished.
+
+## Validation milestone — 2026-09-17
+
+70 tests, Ruff lint/format and strict mypy pass locally. The expanded language
+baseline completes five deliveries, passes 11/12 scenarios and 3/3 required-source
+checks. The `please bring` paraphrase remains unsupported. An urgency-parsing
+regression was fixed. Recorded output: [language-baseline.json](../assets/language-baseline.json).
+
+Readiness probing found no local Ollama service or configured speech weights.
+Model and speech evaluator tests use explicit doubles; no live quality score is
+claimed. The evaluator checks that wrong proposals are not auto-confirmed and
+that transcription failures are not silently dropped from reported coverage.

@@ -50,7 +50,7 @@ class BaselineBackend:
             if colors and not totes:
                 intent.color = colors[-1]
                 intent.tote_id = None
-            if re.search(r"\b(urgent|first)\b", lower):
+            if re.search(r"\b(urgent|urgently|first)\b", lower):
                 intent.priority = "urgent"
             if re.search(r"\bnormal\b", lower):
                 intent.priority = "normal"
