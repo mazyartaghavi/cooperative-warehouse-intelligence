@@ -213,6 +213,18 @@ This command records the actual model, responses, errors, latency, and exact-cas
 accuracy. No live model score is published without an actual run.
 [Verification record and limitations](docs/verification.md).
 
+## Live-model validation
+
+The validation suite now checks 12 multi-turn instruction-to-delivery scenarios,
+including corrections, authorization and confirmation, plus grounded-source checks.
+The recorded rules baseline passes 11/12 scenarios; the unsupported “please bring”
+paraphrase remains a measured limitation. A separate speech evaluator measures
+local recordings without dispatching commands. No live model scores are claimed.
+
+[Run the validation suite](docs/live-validation.md) ·
+[Current progress and blockers](docs/PROGRESS.md) ·
+[Recorded baseline result](assets/language-baseline.json)
+
 ## Repository guide
 
 | Location | Contents |

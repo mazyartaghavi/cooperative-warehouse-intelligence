@@ -140,3 +140,9 @@ shell. The image exposes the rules baseline; the local-only Ollama URL is resolv
 inside the container, so a host Ollama server is not automatically accessible. Use
 the native startup path for local model work. Container execution is not claimed
 verified unless recorded in the verification document.
+
+## Expanded model validation
+
+Use `uv run cwi-check-runtime --model INSTALLED_MODEL` before inference tests.
+See the [live validation guide](live-validation.md) for multi-turn delivery checks,
+the explicit baseline comparator, audio manifests and speech-quality measurement.

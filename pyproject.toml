@@ -25,6 +25,8 @@ dev = ["pytest==9.1.1", "ruff==0.16.7", "mypy==2.3.1"]
 cwi-demo = "cwi.demo:main"
 cwi-evaluate = "cwi.evaluation.run:main"
 cwi-evaluate-llm = "cwi.evaluation.language:main"
+cwi-check-runtime = "cwi.evaluation.runtime:main"
+cwi-evaluate-speech = "cwi.evaluation.speech:main"
 
 [project.optional-dependencies]
 voice = [
