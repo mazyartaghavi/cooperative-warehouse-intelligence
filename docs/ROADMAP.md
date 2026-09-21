@@ -12,6 +12,14 @@ workflows, LLMs and RAG as the primary focus. Implementation is simulation-first
 | Learned assistance | Seeded Q-learning, fixed-policy baselines, bounded active inspection or operator feedback | Synthetic experiments and integrated stale-obstacle fixture |
 | Research package | Mathematical model, documented assumptions, recorded JSON results, live model evaluation command | Reproduction commands and verification record |
 
+## Current status
+
+[Progress log](PROGRESS.md) · [Live validation guide](live-validation.md)
+
+Installed-runtime checks, a multi-turn conversation-to-delivery suite and a speech
+corpus evaluator are implemented. Actual LLM/speech inference remains blocked by
+missing local services, model weights and recordings.
+
 ## External validation still required
 
 - Install and evaluate actual LLM and speech model weights on the intended machine;
