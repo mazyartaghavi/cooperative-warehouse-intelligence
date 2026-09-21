@@ -60,15 +60,17 @@ The prototype and synthetic tests do not establish readiness for a real warehous
 ## Integration review — 2026-09-21
 
 - Reviewed the roadmap, published PR #3, recent main-branch commits and its
-  exact head `3700fd9084efeacdde0af4231aad4d5e9cc6ef13`.
+  code head `3700fd9084efeacdde0af4231aad4d5e9cc6ef13`.
 - GitHub Actions [run 35250872144](https://github.com/mazyartaghavi/cooperative-warehouse-intelligence/actions/runs/35250872144)
   passed both quality and browser jobs: lint, formatting, strict typing, pytest,
   simulation demo, synthetic evaluation and dashboard smoke checks.
-- These are existing CI results, freshly verified today, not a new local test run.
-  Local reproduction is blocked: the previous virtual environment is unusable and
-  the offline dependency cache lacks pinned packages (including NumPy 2.5.3).
-- The default local Ollama endpoint at localhost:11434 refused connection.
-  No live-model, speech or hardware measurement was performed.
+- Restored the local environment with `uv sync --locked` after an initial offline
+  cache miss. Fresh local verification: **70 tests passed**, Ruff lint and format
+  checks passed, strict mypy passed for 31 source files. The local code tree matched
+  the published code head; no new feature implementation is claimed in this review.
+- The runtime readiness command exited 2: no selected LLM and the default local
+  Ollama inventory endpoint was unavailable (`ConnectError`). No speech model
+  was configured. No live-model, speech or hardware measurement was performed.
 - This update records the integration review. Merge remains conditional on checks
   passing for the updated PR head. The next technical milestone remains measured
   live-model evaluation; do not replace missing inference evidence with baseline scores.
