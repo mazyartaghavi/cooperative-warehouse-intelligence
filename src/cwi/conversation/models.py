@@ -33,15 +33,36 @@ class Citation(StrictModel):
     excerpt: str
 
 
+JobAction = Literal["pause", "resume", "cancel"]
+
+
+class JobControl(StrictModel):
+    action: JobAction
+
+
+class JobUpdate(StrictModel):
+    job_id: str
+    status: str
+    paused: bool
+    task: Task
+    robot_id: str | None
+    tick: int
+    message: str
+
+
 class Reply(StrictModel):
     session_id: str
-    status: Literal["clarification", "awaiting_confirmation", "accepted", "rejected", "cancelled"]
+    status: Literal[
+        "clarification", "awaiting_confirmation", "accepted", "rejected", "cancelled", "job_update"
+    ]
     message: str
     backend: str
     task: Task | None = None
     citations: list[Citation] = Field(default_factory=list)
     trace: list[str] = Field(default_factory=list)
     execution_dispatched: bool = False
+    job_id: str | None = None
+    job: JobUpdate | None = None
 
 
 class Message(StrictModel):

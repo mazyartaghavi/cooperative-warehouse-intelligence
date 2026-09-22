@@ -31,16 +31,22 @@ def load_cases(manifest: Path) -> list[AudioCase]:
         raise ValueError("Audio case identifiers must be unique")
     root = manifest.resolve().parent
     for case in cases:
-        path = (root / case.audio).resolve()
-        if not path.is_relative_to(root):
-            raise ValueError("Audio must be inside the manifest directory")
-        if path.suffix.lower() not in {".wav", ".mp3", ".m4a", ".flac", ".ogg", ".webm"}:
-            raise ValueError("Unsupported audio file extension")
-        if not path.is_file() or not 0 < path.stat().st_size <= 10 * 1024 * 1024:
-            raise ValueError("Each audio file must exist and contain 1 byte to 10 MiB")
+        audio_path(root, case.audio)
         if not words(case.reference):
             raise ValueError("Reference must contain at least one word")
     return cases
+
+
+def audio_path(root: Path, name: str) -> Path:
+    root = root.resolve()
+    path = (root / name).resolve()
+    if not path.is_relative_to(root):
+        raise ValueError("Audio must be inside the manifest directory")
+    if path.suffix.lower() not in {".wav", ".mp3", ".m4a", ".flac", ".ogg", ".webm"}:
+        raise ValueError("Unsupported audio file extension")
+    if not path.is_file() or not 0 < path.stat().st_size <= 10 * 1024 * 1024:
+        raise ValueError("Each audio file must exist and contain 1 byte to 10 MiB")
+    return path
 
 
 def words(text: str) -> list[str]:

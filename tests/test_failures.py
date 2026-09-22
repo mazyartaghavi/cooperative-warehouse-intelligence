@@ -6,7 +6,7 @@ from cwi.api.app import create_app
 from cwi.conversation.backends import BackendError, BaselineBackend
 
 
-@pytest.mark.parametrize("text", ["Do not move T17 to P2", "Delete T17"])
+@pytest.mark.parametrize("text", ["Do not move T17 to P2", "Do not bring T17 to P2", "Delete T17"])
 def test_unsupported_baseline_request_does_not_propose_transport(text):
     service = ConversationService(BaselineBackend())
     with pytest.raises(BackendError):

@@ -33,7 +33,7 @@ Use exactly one of `--model` or `--baseline`. The suite creates a fresh isolated
 warehouse for each of 12 scenarios: explicit requests, ambiguous objects, corrections,
 cancellation, unprompted confirmation, payload rejection, restricted destinations,
 priority permissions, protective constraints, unknown IDs, supervisor privileges,
-and a natural-language paraphrase. Five supported baseline cases complete a delivery.
+and a natural-language paraphrase. Six supported baseline cases complete a delivery.
 
 A scenario passes only if every expected status, tote, destination, priority and
 execution flag matches, and the expected delivery completes with the correct updated
@@ -48,10 +48,10 @@ Per-turn responses and wall-clock latency are retained; errors remain in the den
 Model readiness/digest is included for Ollama runs. No inference score is emitted when
 readiness fails. Exit codes: 0 all checks pass, 1 measured mismatch/error, 2 runtime blocked.
 
-The recorded [rules result](../assets/language-baseline.json) passes **11/12 scenarios**
-and all three source-presence checks. The unsupported `Please bring tote T17 to P2`
-request remains a measured baseline limitation. The run correctly exits 1; it is not
-a failed installation. This small synthetic fixture is a regression suite, not evidence
+The recorded [rules result](../assets/language-baseline.json) passes **12/12 scenarios**
+and all three source-presence checks. The previously unsupported `Please bring tote
+T17 to P2` request is now handled by the controlled grammar; negated requests remain
+rejected. The run exits 0. This small synthetic fixture is a regression suite, not evidence
 of broad language generalization. Do not compare live model performance with the
 baseline until an actual live report has been collected.
 
@@ -98,6 +98,58 @@ acceptance threshold. Set quality criteria before collecting evaluation data.
 Reports contain transcripts and local filenames. Keep real operator data local
 unless the participants authorize publication; `outputs/` is already ignored by Git.
 No human or synthetic speech-quality score is published without an actual model run.
+
+## Measure recorded voice through simulated delivery
+
+`cwi-evaluate-voice` joins actual transcription with the conversation evaluator.
+Use a separate scenario manifest alongside your recordings. This is a schema example,
+not an included audio dataset:
+
+```json
+[
+  {
+    "identifier": "operator-01-transport",
+    "recording_kind": "human",
+    "condition": "quiet room",
+    "turns": [
+      {
+        "audio": "command-01.wav",
+        "reference": "Move T17 to P2",
+        "expected_status": "awaiting_confirmation",
+        "expected_task": {"tote_id": "T17", "destination": "P2", "priority": "normal"}
+      },
+      {
+        "text": "confirm",
+        "expected_status": "accepted",
+        "expected_task": {"tote_id": "T17", "destination": "P2", "priority": "normal"}
+      }
+    ],
+    "expected_delivery": {"tote_id": "T17", "destination": "P2", "priority": "normal"}
+  }
+]
+```
+
+```sh
+uv run cwi-evaluate-voice --speech-model /path/to/local/faster-whisper-model \
+  --model YOUR_INSTALLED_MODEL --manifest /path/to/audio/voice-scenarios.json \
+  --output outputs/live-voice-workflow.json
+```
+
+Use `--baseline` instead of `--model` to explicitly pair actual transcription with
+the rules parser. Label synthesized recordings `synthetic`; do not describe such
+runs as evidence about human operators. Cases have separate human/synthetic pass
+rates, transcript hashes, word-error rates, latency, task replies and execution metrics.
+Every case must contain a recording; text turns represent scripted clarification
+or confirmation steps. Rejected or cancelled cases may omit `expected_delivery`.
+
+The evaluator feeds the **actual transcript**, never the reference, to an isolated
+simulation. Transcription failure leaves the case failed and never dispatches work.
+An incorrect proposed tote, destination, priority or status stops execution before
+the next scripted confirmation. These controls validate the pipeline, not human
+review or genuine operator consent. Nothing connects to physical robot hardware.
+Exit 0 means all specified cases match, 1 means a measured failure, and 2 means
+the configured model runtime could not be initialized. No live voice report is
+included until the command has actually run against supplied models and recordings.
 
 ## Remaining validation
 

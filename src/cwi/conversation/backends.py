@@ -35,7 +35,7 @@ class BaselineBackend:
                     "The offline grammar does not support this instruction. "
                     "Use an explicit transport request, correction, or cancel."
                 )
-            if re.search(r"\b(move|take|deliver|transport)\b", lower):
+            if re.search(r"\b(move|take|deliver|transport|bring)\b", lower):
                 intent.action = "transport"
             totes = re.findall(r"\bT\d+\b", turn.upper())
             destinations = re.findall(r"\b[PQ]\d+\b", turn.upper())

@@ -38,7 +38,10 @@ GitHub credential.
 | `CWI_WHISPER_MODEL` | Empty | Existing local faster-whisper model directory |
 | `CWI_ASSISTANCE_POLICY` | `inspect_when_possible` | `q_learning`, `always_ask`, or fixed inspection baseline |
 
-Start a new session for each task. Confirmed and cancelled sessions are terminal.
+Start a new session for each transport. An accepted session remains linked to its
+job and supports explicit `status`, `pause`, `resume`, and `cancel` commands.
+The dashboard's **Discuss task** button reconnects to a dispatched task. A conversation
+cancelled before acceptance remains terminal and cannot dispatch anything.
 A correction clears the pending proposal even if language extraction fails.
 The demo caps sessions at 1,000 and extraction turns per session at 40. For a fresh
 experiment, set `CWI_DB` to a new file; do not delete operational data casually.
@@ -96,7 +99,9 @@ All routes except `/`, `/health`, and API documentation require `X-CWI-Token`.
 | Method and path | Effect |
 |---|---|
 | `POST /sessions` | Create a durable task conversation |
-| `POST /sessions/{id}/messages` | Propose, clarify, correct, confirm, or cancel |
+| `POST /sessions/{id}/messages` | Propose/confirm a transport or control its dispatched job |
+| `GET /jobs/{id}` | Authorized execution status from simulator evidence |
+| `POST /jobs/{id}/actions` | `{ "action": "pause" }`, `resume`, or `cancel` |
 | `POST /knowledge` | Retrieve/generate an informational answer; never dispatch |
 | `POST /speech/transcribe` | Decode audio to reviewed text; never dispatch |
 | `GET /warehouse` | Shared observed state, jobs, metrics and recent events |
@@ -105,11 +110,19 @@ All routes except `/`, `/health`, and API documentation require `X-CWI-Token`.
 | `POST /warehouse/operator-workload` | Set `{ "busy": true }` for assistance decisions |
 
 Health reports configured capabilities, not measured model readiness. Errors include
-401 authentication, 404 unknown session, 409 disabled simulation, 413 large audio,
+401 authentication, 403 job ownership, 404 unknown session/job, 409 invalid job
+transition or disabled simulation, 413 large audio,
 422 invalid input, 429 session cap, and 503 backend failure. Unsupported baseline
-grammar also yields 503. `cancel` cancels an unaccepted conversation; it does not
-recall a robot after an accepted transport. Dashboard pause stops future tick
-requests; one already in flight may complete.
+grammar also yields 503. Before dispatch, `cancel` cancels the conversation. After
+dispatch it cancels the linked mission and, if already carrying cargo, returns the
+tote to its source. Repeating a cancellation does not create another return or
+resume a paused one. The server validates ownership using its configured identity;
+caller-supplied roles are not accepted. Mission controls share the same lock and
+checkpoint transaction as simulation ticks. A failed checkpoint rolls back the action.
+
+The dashboard's global **Pause** stops future tick requests; one already in flight
+may complete. Per-task **Pause** holds only that mission at the next serialized
+operation. Neither control represents a physical protective stop.
 
 ## Checks and research commands
 
