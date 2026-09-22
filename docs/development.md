@@ -35,6 +35,9 @@ GitHub credential.
 | `CWI_DB` | `data/local/cwi.db` | Durable SQLite checkpoint and synthetic procedures |
 | `CWI_OLLAMA_MODEL` | Empty | Name of an installed local Ollama model |
 | `CWI_OLLAMA_URL` | `http://localhost:11434` | Local HTTP endpoint only |
+| `CWI_OLLAMA_TIMEOUT_SECONDS` | `30` | HTTP operation timeout, greater than 0 and at most 600 seconds |
+| `CWI_OLLAMA_CONTEXT_TOKENS` | Ollama default | Optional context size, 1,024–32,768 tokens |
+| `CWI_OLLAMA_OUTPUT_TOKENS` | Ollama default | Optional generation cap, 64–4,096 tokens |
 | `CWI_WHISPER_MODEL` | Empty | Existing local faster-whisper model directory |
 | `CWI_ASSISTANCE_POLICY` | `inspect_when_possible` | `q_learning`, `always_ask`, or fixed inspection baseline |
 
@@ -73,6 +76,10 @@ Start Ollama separately and install a suitable model. Set `CWI_BACKEND=ollama` a
 `CWI_OLLAMA_MODEL` before starting the API. Requests carry the JSON output schema,
 conversation turns, procedure evidence and observed inventory. There is no silent
 fallback to the rules backend on model failure.
+
+The [Windows small-model profile](windows-local-model.md) uses `qwen2.5:1.5b`,
+4,096 context tokens, 512 output tokens and a 180-second timeout. The same settings
+apply to intent extraction and grounded Q&A; reports include the chosen limits.
 
 Task-facing responses are canonical validated summaries. The procedure panel uses
 generated, citation-bearing answers in Ollama mode, and extractive answers in baseline

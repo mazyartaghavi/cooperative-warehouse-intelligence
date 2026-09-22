@@ -26,6 +26,7 @@ cwi-demo = "cwi.demo:main"
 cwi-evaluate = "cwi.evaluation.run:main"
 cwi-evaluate-llm = "cwi.evaluation.language:main"
 cwi-check-runtime = "cwi.evaluation.runtime:main"
+cwi-validate-local = "cwi.evaluation.local_validation:main"
 cwi-evaluate-speech = "cwi.evaluation.speech:main"
 cwi-evaluate-voice = "cwi.evaluation.voice:main"
 

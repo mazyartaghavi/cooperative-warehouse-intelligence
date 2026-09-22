@@ -41,7 +41,7 @@ def answer_question(
         "model": model.model,
         "stream": False,
         "format": Answer.model_json_schema(),
-        "options": {"temperature": 0},
+        "options": model.settings.options(),
         "messages": [
             {
                 "role": "system",
@@ -58,7 +58,7 @@ def answer_question(
         ],
     }
     try:
-        with httpx.Client(timeout=30, trust_env=False) as client:
+        with httpx.Client(timeout=model.settings.timeout_seconds, trust_env=False) as client:
             response = client.post(model.base_url + "/api/chat", json=payload)
             response.raise_for_status()
         answer = Answer.model_validate_json(response.json()["message"]["content"])

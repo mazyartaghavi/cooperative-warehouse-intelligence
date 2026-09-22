@@ -9,13 +9,13 @@ from typing import Any
 
 import httpx
 
-from cwi.conversation.backends import OllamaBackend
+from cwi.conversation.backends import OllamaBackend, OllamaSettings
 
 
 def check_runtime(
     model: str | None, base_url: str = "http://localhost:11434", speech_model: Path | None = None
 ) -> dict[str, Any]:
-    backend = OllamaBackend(model or "readiness-probe", base_url)
+    backend = OllamaBackend(model or "readiness-probe", base_url, settings=OllamaSettings())
     language: dict[str, Any] = {"ready": False, "requested_model": model}
     try:
         with httpx.Client(timeout=3, trust_env=False) as client:
