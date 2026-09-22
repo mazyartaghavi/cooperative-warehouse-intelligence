@@ -4,6 +4,12 @@ This milestone supplies runnable measurement tools. It does **not** claim that a
 live LLM, microphone or speech model has been validated on the development machine.
 The default rules baseline and actual model inference are reported separately.
 
+For Windows with 8 GB RAM, use the [small-model guide](windows-local-model.md).
+`scripts\validate-windows.cmd` runs the comparator and actual inference with an
+explicit 4,096-token context, 512-token output cap and 180-second request timeout.
+It preserves timestamped ZIP reports, including blocked runs, without uploading them.
+The underlying `uv run cwi-validate-local` command also works on other platforms.
+
 ## Check installed services first
 
 ```sh
@@ -47,6 +53,12 @@ still be reviewed for unsupported claims and evaluated on a broader held-out cor
 Per-turn responses and wall-clock latency are retained; errors remain in the denominator.
 Model readiness/digest is included for Ollama runs. No inference score is emitted when
 readiness fails. Exit codes: 0 all checks pass, 1 measured mismatch/error, 2 runtime blocked.
+
+`CWI_OLLAMA_TIMEOUT_SECONDS`, `CWI_OLLAMA_CONTEXT_TOKENS` and
+`CWI_OLLAMA_OUTPUT_TOKENS` configure resource limits for the ordinary language/voice
+evaluators and API. The language report records the selected settings. The bundled
+`cwi-validate-local` runner uses its explicit CLI profile instead of these environment
+values, so it reproduces the same settings on different machines.
 
 The recorded [rules result](../assets/language-baseline.json) passes **12/12 scenarios**
 and all three source-presence checks. The previously unsupported `Please bring tote

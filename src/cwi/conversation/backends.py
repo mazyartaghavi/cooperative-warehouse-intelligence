@@ -1,18 +1,45 @@
 """Interchangeable intent extractors with no silent model fallback."""
 
 import json
+import os
 import re
 from typing import Protocol
 from urllib.parse import urlparse
 
 import httpx
-from pydantic import ValidationError
+from pydantic import Field, ValidationError
 
-from cwi.conversation.models import Citation, Intent
+from cwi.conversation.models import Citation, Intent, StrictModel
 
 
 class BackendError(Exception):
     """Model unavailable, malformed, or unable to satisfy its contract."""
+
+
+class OllamaSettings(StrictModel):
+    """Explicit resource limits shared by task extraction and grounded answers."""
+
+    timeout_seconds: float = Field(default=30.0, gt=0, le=600)
+    context_tokens: int | None = Field(default=None, ge=1024, le=32768)
+    output_tokens: int | None = Field(default=None, ge=64, le=4096)
+
+    @classmethod
+    def from_env(cls) -> "OllamaSettings":
+        context = os.environ.get("CWI_OLLAMA_CONTEXT_TOKENS")
+        output = os.environ.get("CWI_OLLAMA_OUTPUT_TOKENS")
+        return cls(
+            timeout_seconds=float(os.environ.get("CWI_OLLAMA_TIMEOUT_SECONDS", "30")),
+            context_tokens=int(context) if context else None,
+            output_tokens=int(output) if output else None,
+        )
+
+    def options(self) -> dict[str, int]:
+        options = {"temperature": 0}
+        if self.context_tokens is not None:
+            options["num_ctx"] = self.context_tokens
+        if self.output_tokens is not None:
+            options["num_predict"] = self.output_tokens
+        return options
 
 
 class Backend(Protocol):
@@ -66,7 +93,13 @@ class OllamaBackend:
 
     name = "ollama"
 
-    def __init__(self, model: str, base_url: str = "http://localhost:11434") -> None:
+    def __init__(
+        self,
+        model: str,
+        base_url: str = "http://localhost:11434",
+        *,
+        settings: OllamaSettings | None = None,
+    ) -> None:
         parsed = urlparse(base_url)
         if (
             parsed.scheme != "http"
@@ -82,6 +115,7 @@ class OllamaBackend:
             raise ValueError("Set CWI_OLLAMA_MODEL to an installed model name.")
         self.model = model
         self.base_url = base_url.rstrip("/")
+        self.settings = settings if settings is not None else OllamaSettings.from_env()
 
     def extract(self, turns: list[str], evidence: list[Citation]) -> Intent:
         system = (
@@ -99,7 +133,7 @@ class OllamaBackend:
             "model": self.model,
             "stream": False,
             "format": Intent.model_json_schema(),
-            "options": {"temperature": 0},
+            "options": self.settings.options(),
             "messages": [
                 {"role": "system", "content": system},
                 {
@@ -114,7 +148,7 @@ class OllamaBackend:
             ],
         }
         try:
-            with httpx.Client(timeout=30.0, trust_env=False) as client:
+            with httpx.Client(timeout=self.settings.timeout_seconds, trust_env=False) as client:
                 response = client.post(self.base_url + "/api/chat", json=payload)
                 response.raise_for_status()
             raw = response.json()["message"]["content"]

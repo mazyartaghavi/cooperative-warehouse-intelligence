@@ -3,6 +3,7 @@
 import argparse
 import json
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
@@ -104,12 +105,18 @@ QUESTIONS = (
 
 
 def evaluate(
-    backend: Backend, scenarios: tuple[Scenario, ...] = SCENARIOS, *, include_knowledge: bool = True
+    backend: Backend,
+    scenarios: tuple[Scenario, ...] = SCENARIOS,
+    *,
+    include_knowledge: bool = True,
+    progress: Callable[[str], None] | None = None,
 ) -> dict[str, Any]:
     if not scenarios:
         raise ValueError("Provide at least one scenario")
     rows: list[dict[str, Any]] = []
-    for case in scenarios:
+    for index, case in enumerate(scenarios, 1):
+        if progress:
+            progress(f"Scenario {index}/{len(scenarios)}: {case.name}")
         world = World()
         service = ConversationService(backend, Operator(role=case.role), world=world)
         sid = service.new_session()
@@ -183,6 +190,8 @@ def evaluate(
         )
     questions = []
     for query, required in QUESTIONS if include_knowledge else ():
+        if progress:
+            progress(f"Procedure question: {query}")
         start = time.perf_counter()
         try:
             answer = answer_question(
@@ -208,6 +217,11 @@ def evaluate(
             )
     return {
         "backend": backend.name,
+        "inference_settings": (
+            backend.settings.model_dump(exclude_none=True)
+            if isinstance(backend, OllamaBackend)
+            else None
+        ),
         "scenarios": rows,
         "knowledge": questions,
         "scenario_count": len(rows),

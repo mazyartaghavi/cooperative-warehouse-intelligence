@@ -64,6 +64,10 @@ restarts. These are simulator mission controls, not physical emergency stops.
 
 ## Run it locally
 
+**Windows with Ollama and 8 GB RAM:** follow the
+[small-model setup and validation guide](docs/windows-local-model.md). It includes
+a Windows launcher and a ZIP report with actual inference results. Git is optional.
+
 Requirements: Python 3.12 and [uv](https://docs.astral.sh/uv/getting-started/installation/).
 The default demonstration needs no API key, model download, microphone, or robot hardware.
 
@@ -238,7 +242,9 @@ including corrections, authorization and confirmation, plus grounded-source chec
 The recorded rules baseline passes **12/12 scenarios** and **3/3 source-presence
 checks**, with six simulated deliveries, after adding support for “please bring”.
 This is a small regression fixture, not evidence of broad language understanding.
-The current local suite passes **100 automated tests**.
+The current local suite passes **113 automated tests**. A Windows launcher packages
+the baseline, actual inference, model digest, resource settings and latency into a
+new ZIP report per run; unavailable models produce a blocked report without a score.
 
 The speech evaluator measures transcription alone. A second command,
 `cwi-evaluate-voice`, measures recorded speech through clarification, guarded
@@ -247,6 +253,7 @@ confirmation; reference transcripts are never silently substituted. Human and
 synthetic recordings are reported separately. No live model scores are claimed.
 
 [Run the validation suite](docs/live-validation.md) ·
+[Windows small-model setup](docs/windows-local-model.md) ·
 [Current progress and blockers](docs/PROGRESS.md) ·
 [Recorded baseline result](assets/language-baseline.json)
 

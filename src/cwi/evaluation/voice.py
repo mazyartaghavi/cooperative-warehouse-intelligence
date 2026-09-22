@@ -142,6 +142,11 @@ def evaluate_voice(transcriber: Transcriber, backend: Backend, manifest: Path) -
         }
     return {
         "backend": backend.name,
+        "inference_settings": (
+            backend.settings.model_dump(exclude_none=True)
+            if isinstance(backend, OllamaBackend)
+            else None
+        ),
         "scenarios": rows,
         "groups": groups,
         "scope": "Recorded speech and scripted confirmations in isolated simulation only. "

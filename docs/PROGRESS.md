@@ -23,11 +23,15 @@ work has occurred; daily reporting does not imply continuous background executio
   scripted confirmation, transcription failures in the denominator and separate
   human/synthetic groups. Its tests use explicit doubles, not live speech.
 - Added `bring` to the bounded offline grammar and retained negation rejection.
+- Added a Windows launcher and cross-platform `cwi-validate-local` command with
+  a small-model profile, shared inference resource limits and timestamped ZIP reports.
+  The report preserves blocked/interrupted states and keeps actual inference separate
+  from the rules comparator; no model download or upload happens in the evaluator.
 
 ## Current milestone: live-model validation
 
 The evaluation tooling is implemented. Local quality checks on 2026-09-22 pass:
-**100 tests**, Ruff and strict mypy for 32 source files. Speech/model test doubles validate evaluation
+**113 tests**, Ruff and strict mypy for 33 source files. Speech/model test doubles validate evaluation
 logic; they are not live quality measurements.
 
 The actual rules-baseline run now passes **12/12** scenarios and **3/3** source checks;
@@ -45,7 +49,8 @@ is claimed. See [live validation instructions](live-validation.md).
 
 ## Next milestone
 
-1. Identify the machine and installed LLM/speech models for actual inference tests.
+1. Run the [Windows small-model validation](windows-local-model.md) on a machine
+   with Ollama and the selected model installed; retain the generated ZIP evidence.
 2. Run the live suite; fix measured errors without weakening independent guards.
 3. Collect authorized, labeled operator recordings and evaluate speech/noise effects.
 4. Test the combined voice-to-simulated-delivery workflow with human operators.
@@ -65,6 +70,24 @@ The rules grammar is deliberately restricted. The speech interface is turn-based
 not continuous full-duplex conversation. Post-dispatch destination changes/reassignment,
 distributed control, calibrated uncertainty and hardware integration remain extensions.
 The prototype and synthetic tests do not establish readiness for a real warehouse.
+
+## Windows local-model setup milestone - 2026-09-22
+
+- Started from published `main` commit `fef997b15a7b612699e6ebc32696e17e1cba5eba`.
+- Added a Windows command that works with a downloaded project ZIP or Git checkout.
+  Its initial profile is `qwen2.5:1.5b`, 4,096 context tokens, 512 output tokens and
+  a 180-second HTTP timeout. Actual fit/speed on 8 GB RAM remains to be measured.
+- Both intent extraction and grounded Q&A honor explicit resource limits. Ordinary
+  API/evaluator settings can come from the environment; the bundled runner records
+  its explicit CLI settings, model digest, source hash and per-turn latency.
+- Added blocked, failed, interrupted and successful report-path tests with explicit
+  HTTP doubles, plus a hosted Windows job for the launcher, dependency installation,
+  path handling with spaces and diagnostic ZIP verification.
+- Local validation: 113 tests, Ruff and strict mypy pass. An actual invocation of
+  the new command produced a blocked report because this development machine has
+  no running Ollama service. The baseline passed; no live score was invented.
+- Next evidence needed: a ZIP from actual Ollama inference, followed by speech-model
+  and authorized recording evaluation. The runner does not upload anything.
 
 ## Operator control and voice workflow milestone - 2026-09-22
 
