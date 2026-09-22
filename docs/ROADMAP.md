@@ -9,6 +9,7 @@ workflows, LLMs and RAG as the primary focus. Implementation is simulation-first
 | Grounded conversations | Strict intents, active procedures, clarification, corrections, confirmation and role checks | Behavioral and mocked model-contract tests |
 | Cooperative execution | Three robots, CP-SAT assignment, partially observed obstacles, routing, charging, SQLite checkpoints | Static/dynamic delivery scenarios and collision/restart tests |
 | Operator interface | Browser dashboard, microphone/file controls, transcription adapter, text-to-speech controls, grounded Q&A | API/adapter contracts; real browser smoke workflow |
+| Mission interruption | Owner/supervisor pause, resume, status and cancellation; return carried totes; durable recovery | Control, authorization and rollback tests; extended browser workflow |
 | Learned assistance | Seeded Q-learning, fixed-policy baselines, bounded active inspection or operator feedback | Synthetic experiments and integrated stale-obstacle fixture |
 | Research package | Mathematical model, documented assumptions, recorded JSON results, live model evaluation command | Reproduction commands and verification record |
 
@@ -16,8 +17,10 @@ workflows, LLMs and RAG as the primary focus. Implementation is simulation-first
 
 [Progress log](PROGRESS.md) · [Live validation guide](live-validation.md)
 
-Installed-runtime checks, a multi-turn conversation-to-delivery suite and a speech
-corpus evaluator are implemented. Actual LLM/speech inference remains blocked by
+Installed-runtime checks, a multi-turn conversation-to-delivery suite, speech
+corpus evaluation and combined recorded-voice-to-delivery evaluation are implemented.
+The offline grammar now passes the 12-case regression fixture; the local software
+suite passes 100 tests. Actual LLM/speech inference remains blocked by
 missing local services, model weights and recordings.
 
 ## External validation still required

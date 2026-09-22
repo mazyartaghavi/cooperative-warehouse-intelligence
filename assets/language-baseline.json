@@ -50,9 +50,11 @@
               "extract_intent",
               "validate_policy"
             ],
-            "execution_dispatched": false
+            "execution_dispatched": false,
+            "job_id": null,
+            "job": null
           },
-          "latency_s": 0.0032100620001074276
+          "latency_s": 0.005403554000167787
         },
         {
           "text": "confirm",
@@ -87,9 +89,11 @@
               "revalidate",
               "accept_specification"
             ],
-            "execution_dispatched": true
+            "execution_dispatched": true,
+            "job_id": "c00793c2-b777-4c4a-9726-d8df259dfa39",
+            "job": null
           },
-          "latency_s": 0.0001258590000361437
+          "latency_s": 0.00018304500008525793
         }
       ],
       "matched": true,
@@ -100,6 +104,9 @@
         "operator_questions": 0,
         "waits": 0,
         "completed": 1,
+        "cancelled": 0,
+        "returning": 0,
+        "paused": 0,
         "tardiness": 0
       }
     },
@@ -148,9 +155,11 @@
               "extract_intent",
               "validate_policy"
             ],
-            "execution_dispatched": false
+            "execution_dispatched": false,
+            "job_id": null,
+            "job": null
           },
-          "latency_s": 0.0014144300000680232
+          "latency_s": 0.002291968999998062
         },
         {
           "text": "T17",
@@ -203,9 +212,11 @@
               "extract_intent",
               "validate_policy"
             ],
-            "execution_dispatched": false
+            "execution_dispatched": false,
+            "job_id": null,
+            "job": null
           },
-          "latency_s": 0.0009452070000861568
+          "latency_s": 0.0024779420000413666
         },
         {
           "text": "confirm",
@@ -240,9 +251,11 @@
               "revalidate",
               "accept_specification"
             ],
-            "execution_dispatched": true
+            "execution_dispatched": true,
+            "job_id": "51e8aa45-5077-4f36-8e2f-54fc547e0428",
+            "job": null
           },
-          "latency_s": 0.00010407600007056317
+          "latency_s": 0.00015754499986542214
         }
       ],
       "matched": true,
@@ -253,6 +266,9 @@
         "operator_questions": 0,
         "waits": 0,
         "completed": 1,
+        "cancelled": 0,
+        "returning": 0,
+        "paused": 0,
         "tardiness": 0
       }
     },
@@ -305,9 +321,11 @@
               "extract_intent",
               "validate_policy"
             ],
-            "execution_dispatched": false
+            "execution_dispatched": false,
+            "job_id": null,
+            "job": null
           },
-          "latency_s": 0.0013847459999851708
+          "latency_s": 0.0021815790000800916
         },
         {
           "text": "P2",
@@ -354,9 +372,11 @@
               "extract_intent",
               "validate_policy"
             ],
-            "execution_dispatched": false
+            "execution_dispatched": false,
+            "job_id": null,
+            "job": null
           },
-          "latency_s": 0.001224345000082394
+          "latency_s": 0.0017105199999605247
         },
         {
           "text": "confirm",
@@ -391,9 +411,11 @@
               "revalidate",
               "accept_specification"
             ],
-            "execution_dispatched": true
+            "execution_dispatched": true,
+            "job_id": "b6e2d20c-cea5-4cd3-87df-f0b30ae8e65c",
+            "job": null
           },
-          "latency_s": 0.0001049469999543362
+          "latency_s": 0.00014508799995383015
         }
       ],
       "matched": true,
@@ -404,6 +426,9 @@
         "operator_questions": 0,
         "waits": 0,
         "completed": 1,
+        "cancelled": 0,
+        "returning": 0,
+        "paused": 0,
         "tardiness": 0
       }
     },
@@ -456,9 +481,11 @@
               "extract_intent",
               "validate_policy"
             ],
-            "execution_dispatched": false
+            "execution_dispatched": false,
+            "job_id": null,
+            "job": null
           },
-          "latency_s": 0.0013601990001461672
+          "latency_s": 0.0026247670000429935
         },
         {
           "text": "cancel",
@@ -474,9 +501,11 @@
             "trace": [
               "cancel"
             ],
-            "execution_dispatched": false
+            "execution_dispatched": false,
+            "job_id": null,
+            "job": null
           },
-          "latency_s": 6.021000012879085e-05
+          "latency_s": 8.27100000151404e-05
         },
         {
           "text": "confirm",
@@ -492,9 +521,11 @@
             "trace": [
               "cancel"
             ],
-            "execution_dispatched": false
+            "execution_dispatched": false,
+            "job_id": null,
+            "job": null
           },
-          "latency_s": 3.507199994601251e-05
+          "latency_s": 4.484800001591793e-05
         }
       ],
       "matched": true,
@@ -505,6 +536,9 @@
         "operator_questions": 0,
         "waits": 0,
         "completed": 0,
+        "cancelled": 0,
+        "returning": 0,
+        "paused": 0,
         "tardiness": 0
       }
     },
@@ -526,9 +560,11 @@
             "trace": [
               "confirmation_guard"
             ],
-            "execution_dispatched": false
+            "execution_dispatched": false,
+            "job_id": null,
+            "job": null
           },
-          "latency_s": 5.531300007532991e-05
+          "latency_s": 8.316499997818028e-05
         }
       ],
       "matched": true,
@@ -539,6 +575,9 @@
         "operator_questions": 0,
         "waits": 0,
         "completed": 0,
+        "cancelled": 0,
+        "returning": 0,
+        "paused": 0,
         "tardiness": 0
       }
     },
@@ -587,9 +626,11 @@
               "extract_intent",
               "validate_policy"
             ],
-            "execution_dispatched": false
+            "execution_dispatched": false,
+            "job_id": null,
+            "job": null
           },
-          "latency_s": 0.0012770139999247476
+          "latency_s": 0.0017541199999868695
         },
         {
           "text": "confirm",
@@ -605,9 +646,11 @@
             "trace": [
               "confirmation_guard"
             ],
-            "execution_dispatched": false
+            "execution_dispatched": false,
+            "job_id": null,
+            "job": null
           },
-          "latency_s": 3.8688000131514855e-05
+          "latency_s": 5.388099998526741e-05
         }
       ],
       "matched": true,
@@ -618,6 +661,9 @@
         "operator_questions": 0,
         "waits": 0,
         "completed": 0,
+        "cancelled": 0,
+        "returning": 0,
+        "paused": 0,
         "tardiness": 0
       }
     },
@@ -660,9 +706,11 @@
               "extract_intent",
               "validate_policy"
             ],
-            "execution_dispatched": false
+            "execution_dispatched": false,
+            "job_id": null,
+            "job": null
           },
-          "latency_s": 0.0011719359999915469
+          "latency_s": 0.001962423000122726
         },
         {
           "text": "confirm",
@@ -678,9 +726,11 @@
             "trace": [
               "confirmation_guard"
             ],
-            "execution_dispatched": false
+            "execution_dispatched": false,
+            "job_id": null,
+            "job": null
           },
-          "latency_s": 3.66750000466709e-05
+          "latency_s": 5.495899995366926e-05
         }
       ],
       "matched": true,
@@ -691,6 +741,9 @@
         "operator_questions": 0,
         "waits": 0,
         "completed": 0,
+        "cancelled": 0,
+        "returning": 0,
+        "paused": 0,
         "tardiness": 0
       }
     },
@@ -739,9 +792,11 @@
               "extract_intent",
               "validate_policy"
             ],
-            "execution_dispatched": false
+            "execution_dispatched": false,
+            "job_id": null,
+            "job": null
           },
-          "latency_s": 0.0012149520000548364
+          "latency_s": 0.0016963799998848117
         }
       ],
       "matched": true,
@@ -752,6 +807,9 @@
         "operator_questions": 0,
         "waits": 0,
         "completed": 0,
+        "cancelled": 0,
+        "returning": 0,
+        "paused": 0,
         "tardiness": 0
       }
     },
@@ -800,9 +858,11 @@
               "extract_intent",
               "validate_policy"
             ],
-            "execution_dispatched": false
+            "execution_dispatched": false,
+            "job_id": null,
+            "job": null
           },
-          "latency_s": 0.0011858370000936702
+          "latency_s": 0.002140306999990571
         }
       ],
       "matched": true,
@@ -813,6 +873,9 @@
         "operator_questions": 0,
         "waits": 0,
         "completed": 0,
+        "cancelled": 0,
+        "returning": 0,
+        "paused": 0,
         "tardiness": 0
       }
     },
@@ -855,9 +918,11 @@
               "extract_intent",
               "validate_policy"
             ],
-            "execution_dispatched": false
+            "execution_dispatched": false,
+            "job_id": null,
+            "job": null
           },
-          "latency_s": 0.001153369000121529
+          "latency_s": 0.001900127999988399
         },
         {
           "text": "T17",
@@ -904,9 +969,11 @@
               "extract_intent",
               "validate_policy"
             ],
-            "execution_dispatched": false
+            "execution_dispatched": false,
+            "job_id": null,
+            "job": null
           },
-          "latency_s": 0.0009124279999923601
+          "latency_s": 0.0014780340000015713
         },
         {
           "text": "confirm",
@@ -941,9 +1008,11 @@
               "revalidate",
               "accept_specification"
             ],
-            "execution_dispatched": true
+            "execution_dispatched": true,
+            "job_id": "8ea3b62a-0b2f-421d-a92f-05b95ecadf49",
+            "job": null
           },
-          "latency_s": 0.00014297500001703156
+          "latency_s": 0.00014161500007503491
         }
       ],
       "matched": true,
@@ -954,6 +1023,9 @@
         "operator_questions": 0,
         "waits": 0,
         "completed": 1,
+        "cancelled": 0,
+        "returning": 0,
+        "paused": 0,
         "tardiness": 0
       }
     },
@@ -1006,9 +1078,11 @@
               "extract_intent",
               "validate_policy"
             ],
-            "execution_dispatched": false
+            "execution_dispatched": false,
+            "job_id": null,
+            "job": null
           },
-          "latency_s": 0.0012459880001642887
+          "latency_s": 0.0018272700001489284
         },
         {
           "text": "confirm",
@@ -1043,9 +1117,11 @@
               "revalidate",
               "accept_specification"
             ],
-            "execution_dispatched": true
+            "execution_dispatched": true,
+            "job_id": "875d74e8-3c67-4f78-9888-4987676b332a",
+            "job": null
           },
-          "latency_s": 9.918899991134822e-05
+          "latency_s": 0.00017705100003695406
         }
       ],
       "matched": true,
@@ -1056,6 +1132,9 @@
         "operator_questions": 0,
         "waits": 0,
         "completed": 1,
+        "cancelled": 0,
+        "returning": 0,
+        "paused": 0,
         "tardiness": 0
       }
     },
@@ -1071,12 +1150,18 @@
             "P2",
             "normal"
           ],
-          "matched": false,
+          "matched": true,
           "reply": {
-            "status": "clarification",
-            "message": "Please request one tote transport task.",
+            "status": "awaiting_confirmation",
+            "message": "Confirm T17 from A to P2, normal priority? Reply 'confirm' or correct it.",
             "backend": "baseline (rules, no LLM)",
-            "task": null,
+            "task": {
+              "tote_id": "T17",
+              "source": "A",
+              "destination": "P2",
+              "priority": "normal",
+              "requested_by": "demo-operator"
+            },
             "citations": [
               {
                 "document_id": "ACCESS",
@@ -1102,19 +1187,63 @@
               "extract_intent",
               "validate_policy"
             ],
-            "execution_dispatched": false
+            "execution_dispatched": false,
+            "job_id": null,
+            "job": null
           },
-          "latency_s": 0.0011817509998763853
+          "latency_s": 0.0019031340000310593
+        },
+        {
+          "text": "confirm",
+          "expected_status": "accepted",
+          "expected_task": [
+            "T17",
+            "P2",
+            "normal"
+          ],
+          "matched": true,
+          "reply": {
+            "status": "accepted",
+            "message": "Task queued for simulated robot execution. Watch the warehouse for progress.",
+            "backend": "baseline (rules, no LLM)",
+            "task": {
+              "tote_id": "T17",
+              "source": "A",
+              "destination": "P2",
+              "priority": "normal",
+              "requested_by": "demo-operator"
+            },
+            "citations": [
+              {
+                "document_id": "TRANSPORT",
+                "version": "1.0",
+                "title": "Transport confirmation",
+                "excerpt": "Move a known tote to an explicit destination. Resolve ambiguous colors or identifiers. Confirm the complete task before acceptance."
+              }
+            ],
+            "trace": [
+              "confirmation_guard",
+              "revalidate",
+              "accept_specification"
+            ],
+            "execution_dispatched": true,
+            "job_id": "3f4a91a6-7301-4bc4-b38d-cc5313b12664",
+            "job": null
+          },
+          "latency_s": 0.0001975149998543202
         }
       ],
-      "matched": false,
-      "execution_matched": false,
+      "matched": true,
+      "execution_matched": true,
       "metrics": {
-        "distance": 0,
+        "distance": 28,
         "inspections": 0,
         "operator_questions": 0,
         "waits": 0,
-        "completed": 0,
+        "completed": 1,
+        "cancelled": 0,
+        "returning": 0,
+        "paused": 0,
         "tardiness": 0
       }
     }
@@ -1137,7 +1266,7 @@
         "mode": "extractive",
         "execution_dispatched": false
       },
-      "latency_s": 7.397100011985458e-05
+      "latency_s": 0.0001215419999880396
     },
     {
       "question": "What is the payload weight limit?",
@@ -1168,7 +1297,7 @@
         "mode": "extractive",
         "execution_dispatched": false
       },
-      "latency_s": 6.613899995500105e-05
+      "latency_s": 8.942700014813454e-05
     },
     {
       "question": "Who can access Q1?",
@@ -1187,11 +1316,11 @@
         "mode": "extractive",
         "execution_dispatched": false
       },
-      "latency_s": 4.656900000554742e-05
+      "latency_s": 6.11870000284398e-05
     }
   ],
   "scenario_count": 12,
-  "scenario_accuracy": 0.9166666666666666,
+  "scenario_accuracy": 1.0,
   "scope": "Synthetic English fixtures and discrete simulation. Source presence is not semantic faithfulness; no speech or human evaluation.",
   "status": "evaluated",
   "model": null,

@@ -8,7 +8,7 @@ from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from typing import Any
 
-from cwi.conversation.models import Task
+from cwi.conversation.models import JobAction, Task
 from cwi.planning.scheduler import Assignment, Cell, assign, route
 from cwi.rl.clarification import Action, ClarificationPolicy
 from cwi.state.warehouse import Warehouse
@@ -34,6 +34,8 @@ class Job:
     deadline: int
     status: str = "queued"
     completed: int | None = None
+    paused: bool = False
+    cancelled: int | None = None
 
 
 class World:
@@ -79,7 +81,8 @@ class World:
                 raise ValueError("Idempotency key already belongs to a different task.")
             return
         if any(
-            j.task.tote_id == task.tote_id and j.status != "completed" for j in self.jobs.values()
+            j.task.tote_id == task.tote_id and j.status not in {"completed", "cancelled"}
+            for j in self.jobs.values()
         ):
             raise ValueError("This tote already has an active transport task.")
         tote = next((t for t in self.warehouse.totes if t.identifier == task.tote_id), None)
@@ -91,6 +94,34 @@ class World:
             identifier, task, self.tick, self.tick + (20 if task.priority == "urgent" else 50)
         )
         self.event("submitted", job=identifier)
+
+    def control(self, identifier: str, action: JobAction, issuer: str) -> None:
+        """Change a simulated mission at a tick boundary, preserving cargo ownership."""
+        job = self.jobs[identifier]
+        if action == "cancel" and job.status in {"cancelled", "returning"}:
+            return  # Repeated cancellation never resumes a paused return or adds an event.
+        if job.status in {"completed", "cancelled"}:
+            raise ValueError(f"Cannot {action} a {job.status} job.")
+        if action in {"pause", "resume"}:
+            paused = action == "pause"
+            if job.paused != paused:
+                job.paused = paused
+                self.event("paused" if paused else "resumed", job=identifier, issuer=issuer)
+            return
+        robot = next((r for r in self.robots if r.job == identifier), None)
+        job.paused = False
+        if job.status == "carrying":
+            assert robot is not None
+            job.status = "returning"
+            robot.phase = "return"
+            robot.inspection_attempts = 0
+            self.event("cancel_requested", job=identifier, robot=robot.identifier, issuer=issuer)
+        else:
+            # Before pickup there is no cargo to return; the unladen robot goes home.
+            job.status, job.cancelled = "cancelled", self.tick
+            if robot is not None:
+                robot.job, robot.phase = None, "charging"
+            self.event("cancelled", job=identifier, issuer=issuer, cargo_returned=False)
 
     def obstacle(self, cell: Cell, present: bool) -> None:
         if not (0 <= cell[0] < self.width and 0 <= cell[1] < self.height):
@@ -171,7 +202,7 @@ class World:
             if robot.job is not None or robot.phase == "charging":
                 continue
             for job in self.jobs.values():
-                if job.status != "queued":
+                if job.status != "queued" or job.paused:
                     continue
                 source, destination = (
                     self.locations[job.task.source],
@@ -224,8 +255,12 @@ class World:
                         continue
                 else:
                     job = self.jobs[robot.job]
+                    if job.paused:
+                        continue  # Hold the occupied cell, cargo and assignment.
                     goal = self.locations[
-                        job.task.source if robot.phase == "pickup" else job.task.destination
+                        job.task.source
+                        if robot.phase in {"pickup", "return"}
+                        else job.task.destination
                     ]
                 if robot.cell == goal:
                     if robot.job is None:
@@ -236,6 +271,16 @@ class World:
                         robot.phase = "delivery"
                         self.jobs[robot.job].status = "carrying"
                         self.event("picked_up", robot=robot.identifier, job=robot.job)
+                    elif robot.phase == "return":
+                        job = self.jobs[robot.job]
+                        job.status, job.cancelled = "cancelled", self.tick
+                        self.event(
+                            "returned",
+                            robot=robot.identifier,
+                            job=robot.job,
+                            source=job.task.source,
+                        )
+                        robot.job, robot.phase = None, "idle"
                     else:
                         job = self.jobs[robot.job]
                         job.status, job.completed = "completed", self.tick
@@ -299,6 +344,9 @@ class World:
                 "operator_questions": self.operator_questions,
                 "waits": self.waits,
                 "completed": sum(j.status == "completed" for j in self.jobs.values()),
+                "cancelled": sum(j.status == "cancelled" for j in self.jobs.values()),
+                "returning": sum(j.status == "returning" for j in self.jobs.values()),
+                "paused": sum(j.paused for j in self.jobs.values()),
                 "tardiness": sum(
                     max(0, (j.completed or 0) - j.deadline)
                     for j in self.jobs.values()

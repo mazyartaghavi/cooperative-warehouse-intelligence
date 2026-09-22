@@ -46,11 +46,11 @@ def test_unavailable_runtime_cannot_be_reported_ready(monkeypatch):
         check_runtime("demo", "http://example.com")
 
 
-def test_conversation_and_delivery_suite_exposes_baseline_language_limit():
+def test_conversation_and_delivery_suite_includes_bring_paraphrase():
     result = evaluate(BaselineBackend())
     assert result["scenario_count"] == 12
-    assert [c["name"] for c in result["scenarios"] if not c["matched"]] == ["paraphrase"]
-    assert sum(c["metrics"]["completed"] for c in result["scenarios"]) == 5
+    assert all(c["matched"] for c in result["scenarios"])
+    assert sum(c["metrics"]["completed"] for c in result["scenarios"]) == 6
     assert all(q["source_present"] for q in result["knowledge"])
 
 

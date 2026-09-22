@@ -1,6 +1,6 @@
 # Project progress
 
-Last updated: **2026-09-21**. This file distinguishes delivered software from external
+Last updated: **2026-09-22**. This file distinguishes delivered software from external
 validation still required. Reports should cite commits and CI, and state when no new
 work has occurred; daily reporting does not imply continuous background execution.
 
@@ -16,16 +16,25 @@ work has occurred; daily reporting does not imply continuous background executio
 - Expanded validation tools: installed-runtime check, 12 multi-turn conversation-to-
   delivery scenarios, three source-presence checks and a local speech corpus evaluator.
 - Fixed offline parsing of `urgently`, which previously proposed normal priority.
+- Added task pause/resume, evidence-based status and cancellation through the API,
+  dashboard and linked conversation. Carrying robots return totes before cancellation
+  completes; ownership checks, idempotence and restart/failed-save recovery are enforced.
+- Added a recorded-voice-to-delivery evaluator with expected-task checks before
+  scripted confirmation, transcription failures in the denominator and separate
+  human/synthetic groups. Its tests use explicit doubles, not live speech.
+- Added `bring` to the bounded offline grammar and retained negation rejection.
 
 ## Current milestone: live-model validation
 
-The evaluation tooling is implemented. Local quality checks on 2026-09-17 pass:
-**70 tests**, Ruff and strict mypy. Speech/model test doubles validate evaluation
+The evaluation tooling is implemented. Local quality checks on 2026-09-22 pass:
+**100 tests**, Ruff and strict mypy for 32 source files. Speech/model test doubles validate evaluation
 logic; they are not live quality measurements.
 
-The actual rules-baseline run passes **11/12** scenarios and **3/3** source checks;
-five scenarios execute and complete their transport. The unsupported `please bring`
-paraphrase is retained as a failure. See [raw result](../assets/language-baseline.json).
+The actual rules-baseline run now passes **12/12** scenarios and **3/3** source checks;
+six scenarios execute and complete their transport. The previously unsupported
+`please bring` request is covered by the grammar and regression test. See the
+[raw result](../assets/language-baseline.json). This does not measure broad language
+generalization or live-model quality.
 
 ## Blockers
 
@@ -53,9 +62,24 @@ is claimed. See [live validation instructions](live-validation.md).
 ## Known limits
 
 The rules grammar is deliberately restricted. The speech interface is turn-based,
-not continuous full-duplex conversation. Post-dispatch cancellation/reassignment,
+not continuous full-duplex conversation. Post-dispatch destination changes/reassignment,
 distributed control, calibrated uncertainty and hardware integration remain extensions.
 The prototype and synthetic tests do not establish readiness for a real warehouse.
+
+## Operator control and voice workflow milestone - 2026-09-22
+
+- Started from published `main` commit `6a8562f925bb0d54033219dd549b7b4cf098d140`
+  in an isolated worktree, preserving earlier media work.
+- Implemented mission interruption and combined voice workflow evaluation described
+  above. Updated the root README, API guide, roadmap and validation documentation.
+- Local tests, lint, formatting, typing, offline demo, language fixture and synthetic
+  warehouse/RL experiments pass. Hosted browser coverage now exercises per-task
+  pause/resume and cancellation with cargo return, in addition to ordinary delivery.
+- Runtime check remains blocked: no configured LLM, unavailable local Ollama service,
+  no speech weights or recordings. Direct model-download probes timed out. No live
+  inference result was substituted with a baseline result.
+- Next technical work is measured live-model and speech evaluation on a machine
+  with installed runtimes; then human interaction and broader scenario experiments.
 
 ## Integration review — 2026-09-21
 

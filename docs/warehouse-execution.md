@@ -27,3 +27,30 @@ The conversation uses a LangGraph retrieve → extract → validate workflow, fo
 by a separate explicit confirmation and dispatch boundary. Procedures are seeded
 into SQLite; the deterministic policy validator remains authoritative. Stored text
 cannot change hard-coded protective constraints or the server-configured operator role.
+
+## Operator interruption and cargo recovery
+
+`GET /jobs/{id}` reads a job's current state. `POST /jobs/{id}/actions` accepts
+`pause`, `resume`, or `cancel` for the requesting operator or a supervisor.
+The original conversation accepts the same explicit phrases after dispatch.
+
+| Situation | Result of cancellation |
+|---|---|
+| Queued or travelling to pickup | Mark cancelled, unlock the tote, release the unladen robot |
+| Carrying a tote | Mark returning, route to the original source, keep the tote reserved |
+| Returning after an earlier cancellation | No additional action; a paused return remains paused |
+| Returned to source | Mark cancelled, record a return event, release the robot and tote |
+| Already delivered | Reject cancellation; retain the completed delivery record |
+
+Pause is a separate job flag, preserving whether pickup, delivery or return is
+pending. A paused robot retains its occupied grid cell and cargo; other missions
+continue. A paused queued job is excluded from assignment. The simulator has no
+idle battery drain. A blocked or depleted return can remain pending and request
+assistance; cancellation never teleports cargo or guarantees recovery from every
+layout. Cancellation counts are separate from completed deliveries and lateness.
+
+The inventory retains the last station location while a tote is carried, and the
+active-job lock prevents a second assignment. Old checkpoints load with default
+unpaused state. Pauses, returns, cancellation timestamps and issuer audit events
+are persisted; failed writes roll back the entire attempted control action.
+Destination changes and direct robot-to-robot reassignment remain extensions.

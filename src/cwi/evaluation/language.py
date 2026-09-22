@@ -103,7 +103,9 @@ QUESTIONS = (
 )
 
 
-def evaluate(backend: Backend, scenarios: tuple[Scenario, ...] = SCENARIOS) -> dict[str, Any]:
+def evaluate(
+    backend: Backend, scenarios: tuple[Scenario, ...] = SCENARIOS, *, include_knowledge: bool = True
+) -> dict[str, Any]:
     if not scenarios:
         raise ValueError("Provide at least one scenario")
     rows: list[dict[str, Any]] = []
@@ -180,7 +182,7 @@ def evaluate(backend: Backend, scenarios: tuple[Scenario, ...] = SCENARIOS) -> d
             }
         )
     questions = []
-    for query, required in QUESTIONS:
+    for query, required in QUESTIONS if include_knowledge else ():
         start = time.perf_counter()
         try:
             answer = answer_question(

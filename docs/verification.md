@@ -1,5 +1,26 @@
 # Engineering verification
 
+## Current software verification - 2026-09-22
+
+Local Python 3.12 verification passes **100 tests**, Ruff lint/format and strict
+mypy for 32 source files. The offline demo and synthetic warehouse/RL experiments
+run successfully. The recorded rules baseline passes **12/12** scenarios and
+**3/3** required-source checks, with six deliveries, after the `bring` grammar fix.
+
+New tests cover queued and carrying pauses, pre-pickup cancellation, source return,
+blocked returns, tote locks, repeated actions, completed-job conflicts, ownership,
+old checkpoint compatibility, restart and failed-save rollback. Voice workflow
+tests cover transcription errors, wrong IDs, clarification and guarded confirmation
+using explicitly labeled test doubles. They do not measure live speech or LLM quality.
+The browser script also exercises task pause/resume and cargo return after cancellation;
+hosted CI records its actual execution result in the pull-request checks.
+
+Runtime probing still finds no local Ollama service or configured speech weights.
+No live inference or hardware measurement has been performed. Older results below
+are retained as historical evidence rather than represented as the current test count.
+
+## Initial simulation verification
+
 Local verification on **2026-09-14**, Linux, Python 3.12.14, uv 0.12.11.
 
 | Check | Observed result |

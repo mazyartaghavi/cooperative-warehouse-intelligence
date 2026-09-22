@@ -13,7 +13,7 @@ from pydantic import Field
 from cwi.agents.service import ConversationService
 from cwi.conversation.backends import BackendError, BaselineBackend, OllamaBackend
 from cwi.conversation.knowledge import KnowledgeReply, answer_question
-from cwi.conversation.models import Message, Reply, StrictModel
+from cwi.conversation.models import JobControl, JobUpdate, Message, Reply, StrictModel
 from cwi.retrieval.service import Retriever
 from cwi.simulation.world import World
 from cwi.speech.service import LocalWhisper, Transcriber
@@ -110,8 +110,32 @@ def create_app(
             # Log the failure class, not raw operator text or model responses.
             logger.warning("Intent backend failed: %s", type(exc).__name__)
             raise HTTPException(status_code=503, detail=str(exc)) from exc
+        except PermissionError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from exc
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.get("/jobs/{job_id}", dependencies=[Depends(authenticate)])
+    def job_status(job_id: str) -> JobUpdate:
+        try:
+            return service.job_update(job_id)
+        except KeyError as exc:
+            raise HTTPException(404, "Unknown job") from exc
+        except PermissionError as exc:
+            raise HTTPException(403, str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(409, str(exc)) from exc
+
+    @app.post("/jobs/{job_id}/actions", dependencies=[Depends(authenticate)])
+    def job_control(job_id: str, body: JobControl) -> JobUpdate:
+        try:
+            return service.control_job(job_id, body.action)
+        except KeyError as exc:
+            raise HTTPException(404, "Unknown job") from exc
+        except PermissionError as exc:
+            raise HTTPException(403, str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(409, str(exc)) from exc
 
     @app.post("/warehouse/operator-workload", dependencies=[Depends(authenticate)])
     def workload(body: Workload) -> dict[str, bool]:

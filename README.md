@@ -47,6 +47,21 @@ The dashboard shows positions, battery levels, job progress, evidence citations,
 and events. Its environment controls add or remove obstacles without revealing the
 change to the planner until a robot observes it.
 
+### Keep control after dispatch
+
+Each dashboard task has **Pause**, **Resume**, and **Cancel** controls. Pausing one
+task holds its robot and cargo while the others continue. Cancelling before pickup
+releases the tote immediately; cancelling after pickup creates a return mission.
+The tote stays reserved until it reaches its original source. A blocked return
+remains visibly pending and requests assistance instead of claiming cancellation
+or delivery is complete.
+
+Choose **Discuss task** to reconnect to that task's conversation, then type
+`status`, `pause the task`, `resume`, or `cancel`. These explicit control phrases
+use deterministic commands and remain available if the LLM is offline. A task's
+requesting operator or a supervisor can control it. Pause and return state survive
+restarts. These are simulator mission controls, not physical emergency stops.
+
 ## Run it locally
 
 Requirements: Python 3.12 and [uv](https://docs.astral.sh/uv/getting-started/installation/).
@@ -167,6 +182,9 @@ cells, so robots cannot occupy one cell or swap positions in a tick.
   be overridden by operator language. T31 is deliberately overweight for rejection tests.
 - **Coordination:** one active transport per tote, one job per robot, and an
   idempotency key prevent duplicate work. Accepted is distinct from delivered.
+- **Interruption:** pause preserves the robot's occupied cell and cargo; cancellation
+  after pickup returns cargo before releasing the tote. Repeated cancellation is
+  idempotent, and completed delivery cannot be undone by a cancellation request.
 - **Energy:** assignment budgets pickup, delivery, charger return, and reserve.
   Charging occupies the robot's dedicated home cell. New detours can invalidate
   initial estimates; this prototype does not prove recursive energy feasibility.
@@ -217,9 +235,16 @@ accuracy. No live model score is published without an actual run.
 
 The validation suite now checks 12 multi-turn instruction-to-delivery scenarios,
 including corrections, authorization and confirmation, plus grounded-source checks.
-The recorded rules baseline passes 11/12 scenarios; the unsupported “please bring”
-paraphrase remains a measured limitation. A separate speech evaluator measures
-local recordings without dispatching commands. No live model scores are claimed.
+The recorded rules baseline passes **12/12 scenarios** and **3/3 source-presence
+checks**, with six simulated deliveries, after adding support for “please bring”.
+This is a small regression fixture, not evidence of broad language understanding.
+The current local suite passes **100 automated tests**.
+
+The speech evaluator measures transcription alone. A second command,
+`cwi-evaluate-voice`, measures recorded speech through clarification, guarded
+confirmation and simulated delivery. A wrong task proposal stops the case before
+confirmation; reference transcripts are never silently substituted. Human and
+synthetic recordings are reported separately. No live model scores are claimed.
 
 [Run the validation suite](docs/live-validation.md) ·
 [Current progress and blockers](docs/PROGRESS.md) ·
