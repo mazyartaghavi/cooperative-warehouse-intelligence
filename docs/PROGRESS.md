@@ -63,7 +63,8 @@ claim follows from the automated tests. See [live validation instructions](live-
 - Setup failures now stop with a distinct explanation before the evaluator runs.
   The Windows CI smoke test verifies both external-environment creation and the
   diagnostic ZIP path. Local verification passes **123 tests**, Ruff lint and format
-  checks, and strict mypy for 33 source files; hosted checks must pass before merge.
+  checks, and strict mypy for 33 source files. Hosted Python, browser and Windows
+  checks pass in [run 35902494666](https://github.com/mazyartaghavi/cooperative-warehouse-intelligence/actions/runs/35902494666).
 - The rerun with actual `qwen2.5:1.5b` remains external evidence still required.
 
 ## Next milestone
