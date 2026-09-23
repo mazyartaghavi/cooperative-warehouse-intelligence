@@ -47,10 +47,20 @@ inventory. Before confirmation, there must be no dispatched job. A mismatched pr
 is recorded as a failure and is **not automatically confirmed** by the evaluator.
 These are scripted simulation confirmations, not real human consent or physical actions.
 
+Evaluation version 2 additionally checks the authoritative `policy_document` for
+payload, restricted-access, priority and safety rejections. Merely refusing every
+request cannot pass these distinct policy cases. Earlier scores are not directly
+comparable because they checked rejection status without its reason.
+
 Three procedure questions additionally report whether the expected source is cited.
 **Source presence is not semantic correctness or faithfulness.** Generated answers must
 still be reviewed for unsupported claims and evaluated on a broader held-out corpus.
 Per-turn responses and wall-clock latency are retained; errors remain in the denominator.
+The language CLI and Windows runner enable `model_calls` diagnostics: bounded raw
+model JSON, completion reason, available token counts and generation/validation errors.
+This distinguishes citation failures, malformed JSON, output limits and HTTP failures.
+The ordinary API does not retain raw diagnostics. These traces contain generated
+text; inspect a report before sharing it. Nothing is uploaded by the evaluator.
 Model readiness/digest is included for Ollama runs. No inference score is emitted when
 readiness fails. Exit codes: 0 all checks pass, 1 measured mismatch/error, 2 runtime blocked.
 

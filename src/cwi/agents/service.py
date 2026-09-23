@@ -260,6 +260,7 @@ class ConversationService:
                         status="rejected",
                         backend=self.backend.name,
                         message=checked.message,
+                        policy_document=checked.document,
                         citations=[self.retriever.required(checked.document)],
                         trace=["confirmation_guard", "revalidate"],
                     )
@@ -269,6 +270,7 @@ class ConversationService:
                         status="clarification",
                         backend=self.backend.name,
                         message="Observed task details changed. Please restate your request.",
+                        policy_document=checked.document,
                         trace=["confirmation_guard", "revalidate"],
                     )
                 if self.world is not None:
@@ -306,6 +308,7 @@ class ConversationService:
                     "message": decision.message,
                     "backend": self.backend.name,
                     "task": decision.task,
+                    "policy_document": decision.document,
                     "citations": result["evidence"],
                     "trace": result["trace"],
                 }

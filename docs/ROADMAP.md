@@ -20,8 +20,9 @@ workflows, LLMs and RAG as the primary focus. Implementation is simulation-first
 Installed-runtime checks, a multi-turn conversation-to-delivery suite, speech
 corpus evaluation and combined recorded-voice-to-delivery evaluation are implemented.
 The offline grammar now passes the 12-case regression fixture; the local software
-suite passes 100 tests. Actual LLM/speech inference remains blocked by
-missing local services, model weights and recordings.
+suite passes 123 tests. Language evaluation now checks specific rejection policies
+and can retain bounded model diagnostics. Revised prompts and citation constraints
+need actual model evaluation. Speech validation requires local weights and recordings.
 
 ## External validation still required
 

@@ -15,7 +15,11 @@ class Intent(StrictModel):
     color: str | None = None
     destination: str | None = None
     priority: Literal["normal", "urgent"] = "normal"
-    disable_safety: bool = False
+    disable_safety: bool = Field(
+        default=False,
+        description="True only when the operator requests disabling or bypassing protection. "
+        "False for ordinary transport requests and for procedures requiring protection.",
+    )
 
 
 class Task(StrictModel):
@@ -61,6 +65,7 @@ class Reply(StrictModel):
     citations: list[Citation] = Field(default_factory=list)
     trace: list[str] = Field(default_factory=list)
     execution_dispatched: bool = False
+    policy_document: str | None = None
     job_id: str | None = None
     job: JobUpdate | None = None
 

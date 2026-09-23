@@ -42,6 +42,7 @@ def collect(backend: OllamaBackend, output_dir: Path) -> tuple[Path, int]:
     output_dir.mkdir(parents=True, exist_ok=True)
     run = Path(tempfile.mkdtemp(prefix=f"validation-{started:%Y%m%dT%H%M%SZ}-", dir=output_dir))
     metadata: dict[str, Any] = {
+        "report_version": 2,
         "started_utc": started.isoformat(),
         "project_version": version("cooperative-warehouse-intelligence"),
         "python_source_sha256": source_digest(),
@@ -119,6 +120,7 @@ def main() -> None:
         backend = OllamaBackend(
             args.model,
             args.base_url,
+            capture_diagnostics=True,
             settings=OllamaSettings(
                 timeout_seconds=args.timeout_seconds,
                 context_tokens=args.context_tokens,

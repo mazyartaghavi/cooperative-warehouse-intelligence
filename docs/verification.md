@@ -1,9 +1,9 @@
 # Engineering verification
 
-## Current software verification - 2026-09-22
+## Current software verification - 2026-09-23
 
-Local Python 3.12 verification passes **100 tests**, Ruff lint/format and strict
-mypy for 32 source files. The offline demo and synthetic warehouse/RL experiments
+Local Python 3.12 verification passes **123 tests**, Ruff lint/format and strict
+mypy for 33 source files. The offline demo and synthetic warehouse/RL experiments
 run successfully. The recorded rules baseline passes **12/12** scenarios and
 **3/3** required-source checks, with six deliveries, after the `bring` grammar fix.
 
@@ -16,7 +16,8 @@ The browser script also exercises task pause/resume and cargo return after cance
 hosted CI records its actual execution result in the pull-request checks.
 
 Runtime probing still finds no local Ollama service or configured speech weights.
-No live inference or hardware measurement has been performed. Older results below
+No improved live-model or hardware result is claimed from these software checks.
+Revised prompts and schemas require actual inference evaluation. Older results below
 are retained as historical evidence rather than represented as the current test count.
 
 ## Initial simulation verification
