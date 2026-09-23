@@ -1,6 +1,6 @@
 # Project progress
 
-Last updated: **2026-09-22**. This file distinguishes delivered software from external
+Last updated: **2026-09-23**. This file distinguishes delivered software from external
 validation still required. Reports should cite commits and CI, and state when no new
 work has occurred; daily reporting does not imply continuous background execution.
 
@@ -30,8 +30,8 @@ work has occurred; daily reporting does not imply continuous background executio
 
 ## Current milestone: live-model validation
 
-The evaluation tooling is implemented. Local quality checks on 2026-09-22 pass:
-**113 tests**, Ruff and strict mypy for 33 source files. Speech/model test doubles validate evaluation
+The evaluation tooling is implemented. Local quality checks on 2026-09-23 pass:
+**123 tests**, Ruff and strict mypy for 33 source files. Speech/model test doubles validate evaluation
 logic; they are not live quality measurements.
 
 The actual rules-baseline run now passes **12/12** scenarios and **3/3** source checks;
@@ -40,17 +40,21 @@ six scenarios execute and complete their transport. The previously unsupported
 [raw result](../assets/language-baseline.json). This does not measure broad language
 generalization or live-model quality.
 
-## Blockers
+Version-2 scoring checks the actual policy behind each rejection. Prompt/schema
+changes and bounded raw-response diagnostics are implemented; their effectiveness
+requires actual inference. Private evaluation reports are not published here.
+
+## Remaining validation
 
 The development environment has no running Ollama service, selected model or local
 speech-model files. No microphone corpus or physical robot hardware is available.
-No live inference, speech quality, industrial productivity or hardware safety result
-is claimed. See [live validation instructions](live-validation.md).
+No live-model improvement, speech-quality, industrial-productivity or hardware-safety
+claim follows from the automated tests. See [live validation instructions](live-validation.md).
 
 ## Next milestone
 
-1. Run the [Windows small-model validation](windows-local-model.md) on a machine
-   with Ollama and the selected model installed; retain the generated ZIP evidence.
+1. Rerun the updated [Windows validation](windows-local-model.md) with the same
+   model and resource limits; retain the new diagnostic ZIP alongside the original.
 2. Run the live suite; fix measured errors without weakening independent guards.
 3. Collect authorized, labeled operator recordings and evaluate speech/noise effects.
 4. Test the combined voice-to-simulated-delivery workflow with human operators.

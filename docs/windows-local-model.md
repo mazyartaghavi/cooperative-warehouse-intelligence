@@ -85,7 +85,7 @@ It contains only files created for that run:
 | `environment.json` | OS/Python versions, CPU count, project version, Python source hash, resource limits and elapsed time |
 | `runtime-readiness.json` | Selected model, installed model inventory and selected model digest |
 | `language-baseline.json` | Explicit offline rules comparator |
-| `live-language.json` | Actual model responses, per-turn latency and failures, or a blocked/interrupted status |
+| `live-language.json` | Actual replies, bounded raw model JSON, rejection policy, token/error diagnostics and latency, or blocked/interrupted status |
 
 An interrupted run may omit checks it did not reach. The runner does not read
 your operational database or microphone files, and it does not upload the report.
@@ -99,6 +99,12 @@ the baseline score. If the runtime is blocked, reopen Ollama and check that the
 selected tag appears in `ollama list`.
 
 ## 4. Open the application with the same profile
+
+When retesting after a project update, download a fresh ZIP and extract it into a
+new folder. Open PowerShell in the new folder containing `pyproject.toml` and run
+the same launcher. Keep the original `outputs` folder for comparison. You do not
+need to reinstall Ollama or download the same model again. Reports now use stricter
+version-2 rejection scoring, which requires the intended policy reason.
 
 After reviewing the report, set these variables in PowerShell inside the project:
 
