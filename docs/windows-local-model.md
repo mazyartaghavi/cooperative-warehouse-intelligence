@@ -45,6 +45,14 @@ The command installs the pinned project dependencies with uv and obtains Python
 optional speech package, download a language model, change PowerShell execution
 policy, start a public server, or require administrator access.
 
+To avoid long extracted-folder paths and cross-drive hard-link problems, the launcher
+stores its managed Python environment at
+`%LOCALAPPDATA%\cwi-validation-venv` and uses uv's copy mode. It prints that path
+before dependency setup. An explicitly set `UV_PROJECT_ENVIRONMENT` or
+`UV_LINK_MODE` is respected. A dependency-setup failure exits before evaluation and
+therefore cannot create an `outputs` folder; retry the launcher rather than searching
+for a report that was not written.
+
 The runner checks the local model inventory, runs the offline comparator, then
 executes the actual local LLM on 12 conversation scenarios and three procedure
 questions. Scenarios cover clarification, correction, confirmation, permission
@@ -91,6 +99,17 @@ An interrupted run may omit checks it did not reach. The runner does not read
 your operational database or microphone files, and it does not upload the report.
 Reports remain excluded from Git. Readiness is an inventory check, not inference
 quality. The source checks measure citation presence, not semantic faithfulness.
+
+The final `Report saved:` line is the authoritative full path. Copy the text after
+that label into File Explorer's address bar, or open the default report folder from
+the same project terminal with:
+
+```powershell
+explorer.exe (Resolve-Path .\outputs).Path
+```
+
+If `Resolve-Path` reports that `outputs` does not exist, the evaluator did not reach
+report creation. Use the setup error still visible in that PowerShell window.
 
 Exit codes are **0** for all comparator/live checks passing, **1** for a measured
 mismatch or model error, **2** for unavailable runtime, and **130** for interruption

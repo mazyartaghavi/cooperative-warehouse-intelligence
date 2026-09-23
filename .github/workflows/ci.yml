@@ -80,8 +80,10 @@ jobs:
       - name: Verify Windows launcher and blocked-runtime exit code
         shell: cmd
         run: |
+          if exist "%LOCALAPPDATA%\cwi-validation-venv" exit /b 1
           call scripts\validate-windows.cmd --base-url http://127.0.0.1:1 --output-dir "outputs\windows smoke"
           if not "%ERRORLEVEL%"=="2" exit /b 1
+          if not exist "%LOCALAPPDATA%\cwi-validation-venv\Scripts\cwi-validate-local.exe" exit /b 1
           exit /b 0
       - name: Inspect the generated diagnostic bundle
         shell: pwsh

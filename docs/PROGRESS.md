@@ -51,6 +51,21 @@ speech-model files. No microphone corpus or physical robot hardware is available
 No live-model improvement, speech-quality, industrial-productivity or hardware-safety
 claim follows from the automated tests. See [live validation instructions](live-validation.md).
 
+## Windows rerun reliability milestone - 2026-09-23
+
+- A rerun from an extracted Windows project copy installed dependencies but stopped
+  before evaluation, so it correctly produced no `outputs` folder. No second live
+  score is claimed from that attempt.
+- The Windows launcher now prepares the pinned environment explicitly in the short
+  `%LOCALAPPDATA%\cwi-validation-venv` path and defaults uv to copy mode. This avoids
+  fragile cross-drive hard links and deeply nested project-local environments while
+  retaining explicit environment overrides.
+- Setup failures now stop with a distinct explanation before the evaluator runs.
+  The Windows CI smoke test verifies both external-environment creation and the
+  diagnostic ZIP path. Local verification passes **123 tests**, Ruff lint and format
+  checks, and strict mypy for 33 source files; hosted checks must pass before merge.
+- The rerun with actual `qwen2.5:1.5b` remains external evidence still required.
+
 ## Next milestone
 
 1. Rerun the updated [Windows validation](windows-local-model.md) with the same
