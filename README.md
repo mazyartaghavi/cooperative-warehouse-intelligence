@@ -242,7 +242,7 @@ including corrections, authorization and confirmation, plus grounded-source chec
 The recorded rules baseline passes **12/12 scenarios** and **3/3 source-presence
 checks**, with six simulated deliveries, after adding support for “please bring”.
 This is a small regression fixture, not evidence of broad language understanding.
-The current local suite passes **123 automated tests**. A Windows launcher packages
+The current local suite passes **127 automated tests**. A Windows launcher packages
 the baseline, actual inference, model digest, resource settings and latency into a
 new ZIP report per run; unavailable models produce a blocked report without a score.
 

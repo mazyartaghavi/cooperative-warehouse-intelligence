@@ -1,6 +1,6 @@
 # Project progress
 
-Last updated: **2026-09-23**. This file distinguishes delivered software from external
+Last updated: **2026-09-24**. This file distinguishes delivered software from external
 validation still required. Reports should cite commits and CI, and state when no new
 work has occurred; daily reporting does not imply continuous background execution.
 
@@ -31,7 +31,7 @@ work has occurred; daily reporting does not imply continuous background executio
 ## Current milestone: live-model validation
 
 The evaluation tooling is implemented. Local quality checks on 2026-09-23 pass:
-**123 tests**, Ruff and strict mypy for 33 source files. Speech/model test doubles validate evaluation
+**127 tests**, Ruff and strict mypy for 33 source files. Speech/model test doubles validate evaluation
 logic; they are not live quality measurements.
 
 The actual rules-baseline run now passes **12/12** scenarios and **3/3** source checks;
@@ -74,6 +74,17 @@ claim follows from the automated tests. See [live validation instructions](live-
 2. Run the live suite; fix measured errors without weakening independent guards.
 3. Collect authorized, labeled operator recordings and evaluate speech/noise effects.
 4. Test the combined voice-to-simulated-delivery workflow with human operators.
+
+## Repeated live-inference measurement milestone - 2026-09-24
+
+- Added an optional `--repetitions` setting (1–10) to the local validation bundle;
+  the default remains one to avoid increasing the ordinary Windows run time.
+- Repeated runs retain every full model result and add descriptive complete-run,
+  per-scenario and source-presence stability rates. A lucky pass cannot replace a
+  failed repetition, and exit code 0 requires all completed repetitions to pass.
+- Deterministic HTTP doubles verify report separation, aggregation and bounds. They
+  do not measure Qwen stability. An actual repeated local-model result remains external
+  evidence still required.
 
 ## Planned experiments
 

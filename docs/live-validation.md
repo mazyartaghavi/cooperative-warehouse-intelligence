@@ -70,6 +70,13 @@ evaluators and API. The language report records the selected settings. The bundl
 `cwi-validate-local` runner uses its explicit CLI profile instead of these environment
 values, so it reproduces the same settings on different machines.
 
+After a successful single Windows run, `cwi-validate-local --repetitions 3` repeats
+the complete live suite with identical settings. It retains each run and adds a
+repeatability summary with complete-run, scenario and source-presence rates. The
+default remains one run, the accepted range is 1–10, and every completed repetition
+must pass for exit code 0. These are descriptive stability measurements, not confidence
+intervals or evidence of broad language generalization.
+
 The recorded [rules result](../assets/language-baseline.json) passes **12/12 scenarios**
 and all three source-presence checks. The previously unsupported `Please bring tote
 T17 to P2` request is now handled by the controlled grammar; negated requests remain

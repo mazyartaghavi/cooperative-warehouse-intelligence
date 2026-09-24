@@ -6,7 +6,7 @@ import pytest
 
 from cwi.conversation.backends import BackendError, BaselineBackend, OllamaBackend, OllamaSettings
 from cwi.conversation.knowledge import answer_question
-from cwi.evaluation.local_validation import collect
+from cwi.evaluation.local_validation import collect, summarize_repetitions
 from cwi.retrieval.service import Retriever
 
 
@@ -160,6 +160,62 @@ def test_successful_bundle_with_explicit_http_model_double(tmp_path, monkeypatch
     assert sum(case["metrics"]["completed"] for case in live["scenarios"]) == 6
 
 
+def test_repeated_runs_preserve_each_result_and_report_stability(tmp_path, monkeypatch):
+    def handler(request):
+        if request.url.path == "/api/tags":
+            return httpx.Response(
+                200, json={"models": [{"name": "test-double:latest", "digest": "repeat"}]}
+            )
+        body = json.loads(request.content)
+        context = json.loads(body["messages"][1]["content"])
+        if body["format"]["title"] == "Intent":
+            content = BaselineBackend().extract(context["operator_turns"], []).model_dump()
+        else:
+            content = {
+                "answer": "Test-only answer.",
+                "document_ids": [item["document_id"] for item in context["evidence"]],
+            }
+        return httpx.Response(200, json={"message": {"content": json.dumps(content)}})
+
+    install_transport(monkeypatch, handler)
+    archive, code = collect(
+        OllamaBackend("test-double", settings=profile()), tmp_path, repetitions=2
+    )
+    report = read_bundle(archive)
+    assert code == 0
+    assert report["environment.json"]["requested_live_repetitions"] == 2
+    assert report["live-language.json"]["repetition"] == 1
+    assert report["live-language-run-02.json"]["repetition"] == 2
+    summary = report["repeatability.json"]
+    assert summary["completed_repetitions"] == 2
+    assert summary["complete_run_pass_rate"] == 1
+    assert all(row["match_rate"] == 1 for row in summary["scenarios"])
+    assert all(row["source_present_rate"] == 1 for row in summary["knowledge"])
+
+
+def test_repeatability_summary_rejects_inconsistent_or_empty_runs():
+    with pytest.raises(ValueError, match="at least one"):
+        summarize_repetitions([], 2)
+    first = {
+        "scenario_accuracy": 1,
+        "scenarios": [{"name": "one", "matched": True}],
+        "knowledge": [{"question": "source?", "source_present": True}],
+    }
+    second = {
+        "scenario_accuracy": 0,
+        "scenarios": [{"name": "different", "matched": False}],
+        "knowledge": [{"question": "source?", "source_present": False}],
+    }
+    with pytest.raises(ValueError, match="scenario sets differ"):
+        summarize_repetitions([first, second], 2)
+
+
+@pytest.mark.parametrize("repetitions", [0, 11])
+def test_repetition_bounds_are_enforced(tmp_path, repetitions):
+    with pytest.raises(ValueError, match="between 1 and 10"):
+        collect(OllamaBackend("fixture", settings=profile()), tmp_path, repetitions=repetitions)
+
+
 def test_interrupted_run_preserves_diagnostics_without_quality_score(tmp_path, monkeypatch):
     def handler(request):
         raise KeyboardInterrupt
@@ -168,4 +224,9 @@ def test_interrupted_run_preserves_diagnostics_without_quality_score(tmp_path, m
     archive, code = collect(OllamaBackend("fixture", settings=profile()), tmp_path)
     report = read_bundle(archive)
     assert code == 130
-    assert report["live-language.json"] == {"status": "interrupted", "score": None}
+    assert report["live-language.json"] == {
+        "status": "interrupted",
+        "score": None,
+        "completed_repetitions": 0,
+        "requested_repetitions": 1,
+    }

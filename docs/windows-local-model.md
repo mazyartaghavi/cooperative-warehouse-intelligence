@@ -77,6 +77,16 @@ To allow slower CPU responses:
 .\scripts\validate-windows.cmd --timeout-seconds 300
 ```
 
+After one complete run succeeds, measure generation stability with identical settings:
+
+```powershell
+.\scripts\validate-windows.cmd --repetitions 3
+```
+
+This runs the complete live suite three times, so it can take roughly three times as
+long. The allowed range is 1–10; the default remains one. Each measured run is retained
+separately, and the command fails if any repetition fails.
+
 The same runner works without the Windows wrapper:
 
 ```powershell
@@ -94,6 +104,11 @@ It contains only files created for that run:
 | `runtime-readiness.json` | Selected model, installed model inventory and selected model digest |
 | `language-baseline.json` | Explicit offline rules comparator |
 | `live-language.json` | Actual replies, bounded raw model JSON, rejection policy, token/error diagnostics and latency, or blocked/interrupted status |
+
+With `--repetitions 2` or more, the ZIP also contains
+`live-language-run-02.json` (and later numbered runs) plus `repeatability.json`.
+The summary reports complete-run pass rate and per-scenario/source rates without
+discarding individual outputs. These descriptive rates are not confidence intervals.
 
 An interrupted run may omit checks it did not reach. The runner does not read
 your operational database or microphone files, and it does not upload the report.
