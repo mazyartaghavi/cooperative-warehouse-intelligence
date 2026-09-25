@@ -1,11 +1,22 @@
 import json
+import sys
 
 import httpx
 import pytest
 
 from cwi.conversation.backends import BackendError, BaselineBackend
 from cwi.conversation.models import Intent
-from cwi.evaluation.language import SCENARIOS, Scenario, Turn, evaluate
+from cwi.evaluation.language import (
+    SCENARIOS,
+    Scenario,
+    Turn,
+    evaluate,
+    load_scenarios,
+    manifest_digest,
+)
+from cwi.evaluation.language import (
+    main as language_main,
+)
 from cwi.evaluation.runtime import check_runtime
 from cwi.evaluation.speech import edit_distance, evaluate_speech, load_cases, words
 
@@ -91,6 +102,114 @@ def test_model_failures_stay_in_denominator():
     assert all("error" in c["turns"][0] for c in result["scenarios"])
     with pytest.raises(ValueError, match="at least one"):
         evaluate(BaselineBackend(), ())
+
+
+def language_manifest(tmp_path, rows):
+    manifest = tmp_path / "heldout.json"
+    manifest.write_text(json.dumps(rows), encoding="utf-8")
+    return manifest
+
+
+def test_private_language_manifest_runs_through_guarded_delivery(tmp_path):
+    task = {"tote_id": "T17", "destination": "P2", "priority": "normal"}
+    manifest = language_manifest(
+        tmp_path,
+        [
+            {
+                "name": "private-case-01",
+                "turns": [
+                    {
+                        "text": "Move T17 to P2",
+                        "expected_status": "awaiting_confirmation",
+                        "expected_task": task,
+                    },
+                    {"text": "confirm", "expected_status": "accepted", "expected_task": task},
+                ],
+                "expected_delivery": task,
+            }
+        ],
+    )
+    scenarios = load_scenarios(manifest)
+    result = evaluate(BaselineBackend(), scenarios, include_knowledge=False)
+    assert result["scenario_count"] == 1
+    assert result["scenarios"][0]["matched"]
+    assert result["scenarios"][0]["metrics"]["completed"] == 1
+
+
+def test_language_cli_records_path_independent_manifest_provenance(tmp_path, monkeypatch):
+    manifest = language_manifest(
+        tmp_path,
+        [
+            {
+                "name": "private-cancel",
+                "turns": [{"text": "cancel", "expected_status": "cancelled"}],
+            }
+        ],
+    )
+    output = tmp_path / "report.json"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "cwi-evaluate-llm",
+            "--baseline",
+            "--scenario-manifest",
+            str(manifest),
+            "--output",
+            str(output),
+        ],
+    )
+    with pytest.raises(SystemExit) as stopped:
+        language_main()
+    assert stopped.value.code == 0
+    report = json.loads(output.read_text(encoding="utf-8"))
+    assert report["scenario_manifest"] == {
+        "sha256": manifest_digest(manifest),
+        "scenario_count": 1,
+    }
+    assert str(manifest) not in output.read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize(
+    "rows, message",
+    [
+        (
+            [
+                {
+                    "name": "duplicate",
+                    "turns": [{"text": "confirm", "expected_status": "cancelled"}],
+                },
+                {
+                    "name": "duplicate",
+                    "turns": [{"text": "confirm", "expected_status": "cancelled"}],
+                },
+            ],
+            "unique",
+        ),
+        (
+            [
+                {
+                    "name": "missing-task",
+                    "turns": [{"text": "confirm", "expected_status": "accepted"}],
+                }
+            ],
+            "expected task",
+        ),
+        (
+            [
+                {
+                    "name": "unknown-field",
+                    "turns": [{"text": "confirm", "expected_status": "cancelled"}],
+                    "secret": "not allowed",
+                }
+            ],
+            "Extra inputs",
+        ),
+    ],
+)
+def test_language_manifest_rejects_invalid_cases(tmp_path, rows, message):
+    with pytest.raises(ValueError, match=message):
+        load_scenarios(language_manifest(tmp_path, rows))
 
 
 def test_wer_counts_insertions_and_preserves_tote_ids():

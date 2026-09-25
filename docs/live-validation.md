@@ -64,6 +64,62 @@ text; inspect a report before sharing it. Nothing is uploaded by the evaluator.
 Model readiness/digest is included for Ollama runs. No inference score is emitted when
 readiness fails. Exit codes: 0 all checks pass, 1 measured mismatch/error, 2 runtime blocked.
 
+### Evaluate private held-out scenarios
+
+To compare the rules baseline and local model on the same unseen prompts, create a
+JSON manifest **outside the repository**. Do not copy the prompts into tests or commit
+them before evaluation. Example schema:
+
+```json
+[
+  {
+    "name": "heldout-001",
+    "role": "operator",
+    "turns": [
+      {
+        "text": "Move T17 to P2",
+        "expected_status": "awaiting_confirmation",
+        "expected_task": {
+          "tote_id": "T17",
+          "destination": "P2",
+          "priority": "normal"
+        }
+      },
+      {
+        "text": "confirm",
+        "expected_status": "accepted",
+        "expected_task": {
+          "tote_id": "T17",
+          "destination": "P2",
+          "priority": "normal"
+        }
+      }
+    ],
+    "expected_delivery": {
+      "tote_id": "T17",
+      "destination": "P2",
+      "priority": "normal"
+    }
+  }
+]
+```
+
+Run both evaluators without changing the file between commands:
+
+```sh
+uv run cwi-evaluate-llm --baseline --scenario-manifest /private/heldout.json \
+  --output outputs/heldout-baseline.json
+uv run cwi-evaluate-llm --model YOUR_INSTALLED_MODEL \
+  --scenario-manifest /private/heldout.json --output outputs/heldout-model.json
+```
+
+Each report records the manifest SHA-256 and scenario count, allowing confirmation
+that both runs used identical cases without publishing the source file. Reports still
+contain the evaluated prompt text and generated replies, so inspect them before sharing.
+The loader rejects duplicate names, unknown fields, oversized files, missing accepted
+tasks and inconsistent delivery expectations. A held-out set should be designed and
+frozen before inspecting model results; the built-in regression fixture is not held out.
+
 `CWI_OLLAMA_TIMEOUT_SECONDS`, `CWI_OLLAMA_CONTEXT_TOKENS` and
 `CWI_OLLAMA_OUTPUT_TOKENS` configure resource limits for the ordinary language/voice
 evaluators and API. The language report records the selected settings. The bundled

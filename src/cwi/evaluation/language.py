@@ -1,16 +1,20 @@
 """Multi-turn language-to-delivery evaluation with explicit baseline/live provenance."""
 
 import argparse
+import hashlib
 import json
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, Self
+
+from pydantic import Field, model_validator
 
 from cwi.agents.service import ConversationService
 from cwi.conversation.backends import Backend, BackendError, BaselineBackend, OllamaBackend
 from cwi.conversation.knowledge import answer_question
+from cwi.conversation.models import StrictModel
 from cwi.evaluation.runtime import check_runtime
 from cwi.retrieval.service import Retriever
 from cwi.simulation.world import World
@@ -31,6 +35,48 @@ class Scenario:
     turns: tuple[Turn, ...]
     delivery: tuple[str, str, str] | None = None
     role: Literal["operator", "supervisor"] = "operator"
+
+
+class ExpectedTask(StrictModel):
+    tote_id: str = Field(min_length=1, max_length=100)
+    destination: str = Field(min_length=1, max_length=100)
+    priority: Literal["normal", "urgent"] = "normal"
+
+    def key(self) -> tuple[str, str, str]:
+        return self.tote_id, self.destination, self.priority
+
+
+class LanguageTurn(StrictModel):
+    text: str = Field(min_length=1, max_length=2000)
+    expected_status: Literal[
+        "clarification", "awaiting_confirmation", "accepted", "rejected", "cancelled"
+    ]
+    expected_task: ExpectedTask | None = None
+    expected_policy_document: str | None = Field(default=None, min_length=1, max_length=100)
+
+    @model_validator(mode="after")
+    def accepted_task(self) -> Self:
+        if self.expected_status == "accepted" and self.expected_task is None:
+            raise ValueError("Accepted turns require an expected task")
+        return self
+
+
+class LanguageScenario(StrictModel):
+    name: str = Field(min_length=1, max_length=100, pattern=r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
+    role: Literal["operator", "supervisor"] = "operator"
+    turns: list[LanguageTurn] = Field(min_length=1, max_length=20)
+    expected_delivery: ExpectedTask | None = None
+
+    @model_validator(mode="after")
+    def delivery_matches_acceptance(self) -> Self:
+        accepted = [turn.expected_task for turn in self.turns if turn.expected_status == "accepted"]
+        if accepted and self.expected_delivery is None:
+            raise ValueError("Accepted turns require an expected delivery")
+        if self.expected_delivery is not None and not accepted:
+            raise ValueError("Expected delivery requires an accepted turn")
+        if self.expected_delivery is not None and self.expected_delivery not in accepted:
+            raise ValueError("Expected delivery must match an accepted turn's task")
+        return self
 
 
 T17 = ("T17", "P2", "normal")
@@ -126,6 +172,39 @@ QUESTIONS = (
     ("What is the payload weight limit?", "PAYLOAD"),
     ("Who can access Q1?", "ACCESS"),
 )
+
+
+def load_scenarios(manifest: Path) -> tuple[Scenario, ...]:
+    """Load bounded private evaluation cases without adding them to the repository."""
+    if not manifest.is_file() or not 0 < manifest.stat().st_size <= 1024 * 1024:
+        raise ValueError("Language manifest must be a nonempty JSON file of at most 1 MiB")
+    raw = json.loads(manifest.read_text(encoding="utf-8"))
+    if not isinstance(raw, list) or not 1 <= len(raw) <= 100:
+        raise ValueError("Language manifest must contain 1-100 scenarios")
+    cases = [LanguageScenario.model_validate(row) for row in raw]
+    if len({case.name for case in cases}) != len(cases):
+        raise ValueError("Language scenario names must be unique")
+    return tuple(
+        Scenario(
+            name=case.name,
+            role=case.role,
+            turns=tuple(
+                Turn(
+                    text=turn.text,
+                    status=turn.expected_status,
+                    task=turn.expected_task.key() if turn.expected_task else None,
+                    policy_document=turn.expected_policy_document,
+                )
+                for turn in case.turns
+            ),
+            delivery=case.expected_delivery.key() if case.expected_delivery else None,
+        )
+        for case in cases
+    )
+
+
+def manifest_digest(manifest: Path) -> str:
+    return hashlib.sha256(manifest.read_bytes()).hexdigest()
 
 
 def evaluate(
@@ -288,14 +367,34 @@ def main() -> None:
         "--baseline", action="store_true", help="Explicit offline rules comparator"
     )
     parser.add_argument("--base-url", default="http://localhost:11434")
+    parser.add_argument(
+        "--scenario-manifest",
+        type=Path,
+        help="Private JSON scenarios used identically for baseline and model evaluation",
+    )
     parser.add_argument("--output", type=Path, default=Path("outputs/live-language.json"))
     args = parser.parse_args()
+    scenarios: tuple[Scenario, ...] = SCENARIOS
+    manifest_info: dict[str, Any] | None = None
+    if args.scenario_manifest is not None:
+        try:
+            scenarios = load_scenarios(args.scenario_manifest)
+            manifest_info = {
+                "sha256": manifest_digest(args.scenario_manifest),
+                "scenario_count": len(scenarios),
+            }
+        except (OSError, UnicodeError, ValueError) as exc:
+            parser.error(f"Invalid scenario manifest: {exc}")
     result: dict[str, Any]
     readiness = None
     if args.model:
         readiness = check_runtime(args.model, args.base_url)
     if readiness is not None and not readiness["ready"]:
-        result = {"status": "blocked", "readiness": readiness}
+        result = {
+            "status": "blocked",
+            "readiness": readiness,
+            "scenario_manifest": manifest_info,
+        }
         code = 2
     else:
         backend: Backend = (
@@ -303,8 +402,13 @@ def main() -> None:
             if args.model
             else BaselineBackend()
         )
-        result = evaluate(backend)
-        result.update(status="evaluated", model=args.model, readiness=readiness)
+        result = evaluate(backend, scenarios)
+        result.update(
+            status="evaluated",
+            model=args.model,
+            readiness=readiness,
+            scenario_manifest=manifest_info,
+        )
         code = (
             0
             if (

@@ -1,6 +1,6 @@
 # Project progress
 
-Last updated: **2026-09-24**. This file distinguishes delivered software from external
+Last updated: **2026-09-25**. This file distinguishes delivered software from external
 validation still required. Reports should cite commits and CI, and state when no new
 work has occurred; daily reporting does not imply continuous background execution.
 
@@ -30,8 +30,8 @@ work has occurred; daily reporting does not imply continuous background executio
 
 ## Current milestone: live-model validation
 
-The evaluation tooling is implemented. Local quality checks on 2026-09-23 pass:
-**127 tests**, Ruff and strict mypy for 33 source files. Speech/model test doubles validate evaluation
+The evaluation tooling is implemented. Local quality checks on 2026-09-25 pass:
+**132 tests**, Ruff and strict mypy for 33 source files. Speech/model test doubles validate evaluation
 logic; they are not live quality measurements.
 
 The actual rules-baseline run now passes **12/12** scenarios and **3/3** source checks;
@@ -85,6 +85,18 @@ claim follows from the automated tests. See [live validation instructions](live-
 - Deterministic HTTP doubles verify report separation, aggregation and bounds. They
   do not measure Qwen stability. An actual repeated local-model result remains external
   evidence still required.
+
+## Private held-out language evaluation milestone - 2026-09-25
+
+- Added bounded JSON scenario manifests to `cwi-evaluate-llm`, allowing the rules
+  baseline and installed local model to use the same privately held prompts.
+- Reports record the manifest SHA-256 and case count but not its local path. Evaluated
+  prompts and replies remain in reports and must be reviewed before sharing.
+- Validation rejects duplicate names, unknown fields, oversized files, missing tasks
+  on accepted turns and inconsistent delivery expectations. Existing wrong-proposal
+  and pre-confirmation execution guards remain active for manifest cases.
+- Automated tests use synthetic fixtures only. No private held-out corpus or live-model
+  result is claimed; those remain external evidence still required.
 
 ## Planned experiments
 
