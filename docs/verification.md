@@ -1,8 +1,8 @@
 # Engineering verification
 
-## Current software verification - 2026-09-23
+## Current software verification - 2026-09-25
 
-Local Python 3.12 verification passes **127 tests**, Ruff lint/format and strict
+Local Python 3.12 verification passes **132 tests**, Ruff lint/format and strict
 mypy for 33 source files. The offline demo and synthetic warehouse/RL experiments
 run successfully. The recorded rules baseline passes **12/12** scenarios and
 **3/3** required-source checks, with six deliveries, after the `bring` grammar fix.
@@ -21,6 +21,8 @@ Revised prompts and schemas require actual inference evaluation. Older results b
 are retained as historical evidence rather than represented as the current test count.
 Optional repeated-inference reporting is covered with deterministic HTTP model doubles;
 this verifies aggregation and artifact retention, not live-model stability.
+Private language-manifest validation and guarded simulated delivery are covered with
+synthetic cases; no held-out prompt set or live-model score is included.
 
 ## Initial simulation verification
 

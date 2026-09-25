@@ -242,14 +242,16 @@ including corrections, authorization and confirmation, plus grounded-source chec
 The recorded rules baseline passes **12/12 scenarios** and **3/3 source-presence
 checks**, with six simulated deliveries, after adding support for “please bring”.
 This is a small regression fixture, not evidence of broad language understanding.
-The current local suite passes **127 automated tests**. A Windows launcher packages
+The current local suite passes **132 automated tests**. A Windows launcher packages
 the baseline, actual inference, model digest, resource settings and latency into a
 new ZIP report per run; unavailable models produce a blocked report without a score.
 
 Version-2 evaluation checks the specific policy behind a rejection, so a blanket
 refusal cannot pass unrelated policy cases. Language reports include bounded raw
 model JSON and error diagnostics. Revised prompts and citation constraints still
-require actual local inference to measure their effectiveness.
+require actual local inference to measure their effectiveness. The evaluator also
+accepts private held-out scenario manifests and records their SHA-256 so baseline and
+model runs can be compared without committing the prompt set.
 
 The speech evaluator measures transcription alone. A second command,
 `cwi-evaluate-voice`, measures recorded speech through clarification, guarded
